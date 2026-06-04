@@ -37,7 +37,7 @@ export function CourseCard({ course }: Props) {
       {/* Thumbnail */}
       <div className="relative aspect-video border-b-2 border-[#0F0F0F]" style={{ backgroundColor: levelBg + "55" }}>
         {course.imageUrl ? (
-          <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
+          <Image src={course.imageUrl} alt={course.title} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <BookOpen className="w-8 h-8 text-[#0F0F0F]/20" />
