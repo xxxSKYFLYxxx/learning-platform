@@ -1,65 +1,132 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, BookOpen, Users, Award, TrendingUp } from "lucide-react";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { prisma } from "@/lib/prisma";
+import { CourseCard } from "@/components/course/CourseCard";
 
-export default function Home() {
+async function getFeaturedCourses() {
+  const rows = await prisma.course.findMany({
+    where: { published: true },
+    take: 6,
+    orderBy: { enrollments: { _count: "desc" } },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      imageUrl: true,
+      price: true,
+      isFree: true,
+      level: true,
+      instructor: { select: { id: true, name: true, image: true } },
+      _count: { select: { enrollments: true, reviews: true } },
+    },
+  });
+  return rows.map((r) => ({ ...r, price: r.price ? Number(r.price) : null }));
+}
+
+const STATS = [
+  { icon: BookOpen, label: "Курсов", value: "50+" },
+  { icon: Users, label: "Студентов", value: "2 000+" },
+  { icon: Award, label: "Сертификатов выдано", value: "800+" },
+  { icon: TrendingUp, label: "Среднее завершение", value: "78%" },
+];
+
+export default async function HomePage() {
+  const courses = await getFeaturedCourses();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <>
+      <Header />
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="bg-primary text-white py-24 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="font-display text-5xl md:text-6xl font-bold leading-tight mb-6">
+              Учитесь у лучших.{" "}
+              <span className="text-secondary">Растите каждый день.</span>
+            </h1>
+            <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+              Практические курсы от опытных специалистов. Без воды -- только то, что работает.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/courses"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-secondary text-white font-semibold rounded-xl hover:bg-secondary/90 transition-colors"
+              >
+                Смотреть курсы <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/courses?isFree=true"
+                className="inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-white rounded-xl hover:bg-white/10 transition-colors"
+              >
+                Бесплатные курсы
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats */}
+        <section className="bg-white border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {STATS.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="text-center">
+                  <Icon className="w-6 h-6 text-secondary mx-auto mb-2" />
+                  <div className="text-3xl font-bold text-primary font-display">{value}</div>
+                  <div className="text-sm text-muted mt-1">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Featured courses */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <h2 className="font-display text-3xl font-bold text-primary">Популярные курсы</h2>
+              <p className="text-muted mt-2">Самые востребованные среди студентов</p>
+            </div>
+            <Link href="/courses" className="text-sm text-secondary font-medium hover:underline flex items-center gap-1">
+              Все курсы <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {courses.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course) => (
+                <CourseCard key={course.id} course={course} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 text-muted">
+              <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-30" />
+              <p>Курсы появятся совсем скоро</p>
+            </div>
+          )}
+        </section>
+
+        {/* CTA Banner */}
+        <section className="bg-surface border-y border-gray-100">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+            <h2 className="font-display text-3xl font-bold text-primary mb-4">
+              Готовы начать обучение?
+            </h2>
+            <p className="text-muted mb-8 max-w-xl mx-auto">
+              Зарегистрируйтесь бесплатно и получите доступ к первым урокам прямо сейчас.
+            </p>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+              Начать бесплатно <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </section>
       </main>
-    </div>
+      <Footer />
+    </>
   );
 }
