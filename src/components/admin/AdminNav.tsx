@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, BookOpen, Users, ShoppingCart, LogOut, ChevronRight } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/layout/Logo";
 
 const NAV = [
   { href: "/admin",             icon: LayoutDashboard, label: "Дашборд" },
@@ -20,11 +21,8 @@ export function AdminNav() {
     <aside className="w-52 shrink-0 bg-[#0F0F0F] flex flex-col min-h-screen sticky top-0 h-screen">
       {/* Brand */}
       <div className="px-5 py-4 border-b-2 border-white/10">
-        <div className="flex items-center gap-0">
-          <span className="px-2 py-0.5 text-[#FAFAF7] text-sm font-black bg-[#D4402F]" style={{ fontFamily: "var(--font-display)" }}>К</span>
-          <span className="px-1.5 py-0.5 text-[#0F0F0F] text-sm font-black bg-[#FAFAF7]" style={{ fontFamily: "var(--font-display)" }}>УРС</span>
-        </div>
-        <p className="text-[#555] text-[10px] mt-1.5 tracking-widest" style={{ fontFamily: "var(--font-mono)" }}>ADMIN</p>
+        <Logo variant="light" size="sm" />
+        <p className="text-[#555] text-[10px] mt-2 tracking-widest" style={{ fontFamily: "var(--font-mono)" }}>ADMIN</p>
       </div>
 
       {/* Nav */}
