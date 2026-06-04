@@ -1,42 +1,69 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-primary text-white mt-auto">
+    <footer className="border-t-2 border-[#0F0F0F] bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-3">
-              <BookOpen className="w-5 h-5 text-secondary" />
-              <span className="font-display text-lg font-bold">Платформа</span>
+        <div className="flex flex-col md:flex-row justify-between gap-10">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-0 select-none mb-4">
+              <span
+                className="inline-block px-2 py-0.5 text-[#FAFAF7] text-base font-black border-2 border-[#0F0F0F] bg-[#0F0F0F]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                К
+              </span>
+              <span
+                className="inline-block px-1.5 py-0.5 text-[#0F0F0F] text-base font-black border-2 border-l-0 border-[#0F0F0F]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                УРС
+              </span>
             </div>
-            <p className="text-white/60 text-sm leading-relaxed max-w-xs">
-              Онлайн-курсы от практикующих специалистов. Учитесь в своём темпе.
+            <p className="text-sm text-[#787068] max-w-xs leading-relaxed" style={{ fontFamily: "var(--font-sans)" }}>
+              Практические курсы для тех, кто хочет работать в IT.
             </p>
           </div>
 
-          <div>
-            <h4 className="text-sm font-semibold text-secondary mb-3">Обучение</h4>
-            <ul className="space-y-2 text-sm text-white/60">
-              <li><Link href="/courses" className="hover:text-white transition-colors">Все курсы</Link></li>
-              <li><Link href="/courses?level=BEGINNER" className="hover:text-white transition-colors">Для начинающих</Link></li>
-              <li><Link href="/courses?isFree=true" className="hover:text-white transition-colors">Бесплатные</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold text-secondary mb-3">Компания</h4>
-            <ul className="space-y-2 text-sm text-white/60">
-              <li><Link href="/about" className="hover:text-white transition-colors">О нас</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Контакты</Link></li>
-              <li><Link href="/privacy" className="hover:text-white transition-colors">Политика</Link></li>
-            </ul>
+          {/* Links */}
+          <div className="grid grid-cols-2 gap-10">
+            <div>
+              <h4
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0F0F0F] mb-3"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Обучение
+              </h4>
+              <ul className="space-y-2 text-sm text-[#787068]" style={{ fontFamily: "var(--font-sans)" }}>
+                <li><Link href="/courses" className="hover:text-[#0F0F0F] transition-colors">Все курсы</Link></li>
+                <li><Link href="/courses?level=BEGINNER" className="hover:text-[#0F0F0F] transition-colors">Для начинающих</Link></li>
+                <li><Link href="/courses?isFree=true" className="hover:text-[#0F0F0F] transition-colors">Бесплатные</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0F0F0F] mb-3"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Компания
+              </h4>
+              <ul className="space-y-2 text-sm text-[#787068]" style={{ fontFamily: "var(--font-sans)" }}>
+                <li><Link href="/about" className="hover:text-[#0F0F0F] transition-colors">О нас</Link></li>
+                <li><Link href="/contact" className="hover:text-[#0F0F0F] transition-colors">Контакты</Link></li>
+                <li><Link href="/privacy" className="hover:text-[#0F0F0F] transition-colors">Политика</Link></li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-8 pt-6 text-center text-xs text-white/40">
-          © {new Date().getFullYear()} Платформа. Все права защищены.
+        <div className="border-t-2 border-[#0F0F0F] mt-10 pt-5 flex items-center justify-between">
+          <span className="text-xs text-[#787068]" style={{ fontFamily: "var(--font-mono)" }}>
+            © {new Date().getFullYear()} КУРС
+          </span>
+          <span className="text-xs text-[#787068]" style={{ fontFamily: "var(--font-mono)" }}>
+            v1.0.0
+          </span>
         </div>
       </div>
     </footer>

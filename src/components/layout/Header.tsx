@@ -2,78 +2,120 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { BookOpen, User, LogOut, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+
+function Logo() {
+  return (
+    <Link href="/" className="group flex items-center gap-0 select-none">
+      <span
+        className="inline-block px-2 py-0.5 text-[#FAFAF7] text-base font-black tracking-tight border-2 border-[#0F0F0F] bg-[#0F0F0F] group-hover:bg-[#D4402F] group-hover:border-[#D4402F] transition-colors"
+        style={{ fontFamily: "var(--font-display)" }}
+      >
+        К
+      </span>
+      <span
+        className="inline-block px-1.5 py-0.5 text-[#0F0F0F] text-base font-black tracking-tight border-2 border-l-0 border-[#0F0F0F]"
+        style={{ fontFamily: "var(--font-display)" }}
+      >
+        УРС
+      </span>
+    </Link>
+  );
+}
 
 export function Header() {
   const { data: session } = useSession();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2 font-display text-xl font-bold text-primary">
-            <BookOpen className="w-6 h-6 text-secondary" />
-            Платформа
+    <header className="sticky top-0 z-50 bg-white border-b-2 border-[#0F0F0F]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-6">
+        <Logo />
+
+        <nav className="hidden md:flex items-center gap-5 ml-4">
+          <Link
+            href="/courses"
+            className="text-sm font-semibold text-[#787068] hover:text-[#0F0F0F] transition-colors"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
+            Курсы
           </Link>
+          {session?.user?.role === "INSTRUCTOR" && (
+            <Link
+              href="/instructor"
+              className="text-sm font-semibold text-[#787068] hover:text-[#0F0F0F] transition-colors"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
+              Преподаватель
+            </Link>
+          )}
+          {session?.user?.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="text-sm font-semibold text-[#787068] hover:text-[#0F0F0F] transition-colors"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
+              Админ
+            </Link>
+          )}
+        </nav>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm text-muted">
-            <Link href="/courses" className="hover:text-text transition-colors">Курсы</Link>
-            {session?.user?.role === "INSTRUCTOR" && (
-              <Link href="/instructor" className="hover:text-text transition-colors">Преподаватель</Link>
-            )}
-            {session?.user?.role === "ADMIN" && (
-              <Link href="/admin" className="hover:text-text transition-colors">Админ</Link>
-            )}
-          </nav>
-
-          <div className="hidden md:flex items-center gap-3">
-            {session ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-1.5 text-sm text-muted hover:text-text transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  {session.user?.name ?? "Кабинет"}
-                </Link>
-                <button
-                  onClick={() => signOut()}
-                  className="flex items-center gap-1.5 text-sm text-muted hover:text-error transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </>
-            ) : (
+        <div className="ml-auto flex items-center gap-3">
+          {session ? (
+            <>
               <Link
-                href="/login"
-                className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/90 transition-colors"
+                href="/dashboard"
+                className="text-sm font-semibold text-[#787068] hover:text-[#0F0F0F] transition-colors hidden md:block"
+                style={{ fontFamily: "var(--font-sans)" }}
               >
-                Войти
+                {session.user?.name?.split(" ")[0] ?? "Кабинет"}
               </Link>
-            )}
-          </div>
+              <button
+                onClick={() => signOut()}
+                className="text-xs text-[#787068] hover:text-[#D4402F] transition-colors hidden md:block"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                [выйти]
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="px-5 py-2 bg-[#0F0F0F] text-[#FAFAF7] text-sm font-black border-2 border-[#0F0F0F] shadow-brutal-r hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Войти
+            </Link>
+          )}
 
           <button
-            className="md:hidden p-2 text-muted hover:text-text"
-            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden p-1 text-[#787068] hover:text-[#0F0F0F]"
+            onClick={() => setOpen(!open)}
           >
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {menuOpen && (
-        <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 flex flex-col gap-3">
-          <Link href="/courses" className="text-sm text-muted py-1" onClick={() => setMenuOpen(false)}>Курсы</Link>
+      {open && (
+        <div className="md:hidden border-t-2 border-[#0F0F0F] bg-white px-4 py-4 flex flex-col gap-3">
+          <Link href="/courses" className="text-sm font-semibold text-[#0F0F0F] py-1" onClick={() => setOpen(false)}>
+            Курсы
+          </Link>
           {session ? (
             <>
-              <Link href="/dashboard" className="text-sm text-muted py-1" onClick={() => setMenuOpen(false)}>Мой кабинет</Link>
-              <button onClick={() => signOut()} className="text-sm text-error text-left py-1">Выйти</button>
+              <Link href="/dashboard" className="text-sm font-semibold text-[#0F0F0F] py-1" onClick={() => setOpen(false)}>
+                Мой кабинет
+              </Link>
+              <button onClick={() => signOut()} className="text-sm text-[#D4402F] text-left py-1">
+                Выйти
+              </button>
             </>
           ) : (
-            <Link href="/login" className="text-sm font-medium text-primary py-1" onClick={() => setMenuOpen(false)}>Войти</Link>
+            <Link href="/login" className="text-sm font-black text-[#0F0F0F] py-1" onClick={() => setOpen(false)}>
+              Войти
+            </Link>
           )}
         </div>
       )}
