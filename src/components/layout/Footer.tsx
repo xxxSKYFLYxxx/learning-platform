@@ -28,6 +28,7 @@ export function Footer() {
                 <li><Link href="/about" className="hover:text-[#0F0F0F] transition-colors">О нас</Link></li>
                 <li><Link href="/contact" className="hover:text-[#0F0F0F] transition-colors">Контакты</Link></li>
                 <li><Link href="/privacy" className="hover:text-[#0F0F0F] transition-colors">Политика</Link></li>
+                <li><Link href="/offer" className="hover:text-[#0F0F0F] transition-colors">Оферта</Link></li>
               </ul>
             </div>
           </div>

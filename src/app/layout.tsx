@@ -25,15 +25,29 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "КУРС — Онлайн-обучение",
+    default: "КУРС — Онлайн-обучение программированию",
     template: "%s | КУРС",
   },
   description:
     "Практические курсы по программированию на русском языке. JavaScript, React, TypeScript, Python и другие технологии.",
+  keywords: [
+    "онлайн курсы программирования",
+    "обучение программированию",
+    "курсы JavaScript",
+    "курсы React",
+    "курсы TypeScript",
+    "курсы Python",
+    "обучение IT",
+    "видеокурсы",
+    "русский язык",
+    "сертификат программирование",
+  ],
   metadataBase: new URL(process.env.AUTH_URL ?? "http://localhost:3002"),
+  alternates: { canonical: process.env.AUTH_URL ?? "http://localhost:3002" },
   openGraph: {
+    siteName: "КУРС",
     locale: "ru_RU",
-    type:   "website",
+    type: "website",
   },
 };
 

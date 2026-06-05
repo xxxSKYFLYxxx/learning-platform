@@ -34,10 +34,36 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const course = await getCourse(slug);
   if (!course) return { title: "Курс не найден" };
+
+  const base = process.env.AUTH_URL ?? "http://localhost:3002";
+  const url = `${base}/courses/${slug}`;
+  const avgRating =
+    course.reviews.length > 0
+      ? course.reviews.reduce((a, r) => a + r.rating, 0) / course.reviews.length
+      : null;
+
   return {
     title: course.title,
     description: course.description ?? undefined,
-    openGraph: { images: course.imageUrl ? [course.imageUrl] : [] },
+    keywords: [
+      course.title,
+      "онлайн курс",
+      "программирование",
+      "обучение",
+      course.instructor.name ?? "",
+      "курс купить",
+      "русский язык",
+    ].filter(Boolean),
+    alternates: { canonical: url },
+    openGraph: {
+      title: course.title,
+      description: course.description ?? undefined,
+      url,
+      locale: "ru_RU",
+      type: "article",
+      images: course.imageUrl ? [{ url: course.imageUrl, width: 1280, height: 720 }] : [],
+    },
+    other: avgRating ? { "og:rating": String(avgRating.toFixed(1)) } : {},
   };
 }
 
@@ -63,8 +89,63 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       ? course.reviews.reduce((a, r) => a + r.rating, 0) / course.reviews.length
       : null;
 
+  const base = process.env.AUTH_URL ?? "http://localhost:3002";
+
+  const courseSchema = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: course.title,
+    description: course.description ?? undefined,
+    url: `${base}/courses/${course.slug}`,
+    image: course.imageUrl ?? undefined,
+    provider: {
+      "@type": "Organization",
+      name: "КУРС",
+      url: base,
+    },
+    instructor: {
+      "@type": "Person",
+      name: course.instructor.name ?? "",
+    },
+    offers: {
+      "@type": "Offer",
+      price: course.isFree ? "0" : String(Number(course.price)),
+      priceCurrency: "RUB",
+      availability: "https://schema.org/InStock",
+    },
+    ...(avgRating && course._count.reviews > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: avgRating.toFixed(1),
+            reviewCount: course._count.reviews,
+            bestRating: "5",
+            worstRating: "1",
+          },
+        }
+      : {}),
+    numberOfCredits: totalLessons,
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: "online",
+      inLanguage: "ru",
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Главная", item: base },
+      { "@type": "ListItem", position: 2, name: "Курсы", item: `${base}/courses` },
+      { "@type": "ListItem", position: 3, name: course.title, item: `${base}/courses/${course.slug}` },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <Header />
       <main className="flex-1">
         {/* Hero */}
