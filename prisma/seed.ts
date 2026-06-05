@@ -16,7 +16,7 @@ const IMG = {
   ts:        PX(4164418),   // black screen with code (VS Code)
   node:      PX(6424590),   // programming code on laptop dark
   python:    PX(3888151),   // workplace laptop code
-  git:       PX(1102797),   // programming codes screengrab
+  git:       PX(546819),    // source code on screen
   css:       PX(270404),    // colorful code coder coding
   nextjs:    PX(25437427),  // computer monitor displaying lines of code
   // Instructor photos

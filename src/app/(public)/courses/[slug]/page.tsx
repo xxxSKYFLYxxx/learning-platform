@@ -177,7 +177,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               </div>
               <div className="flex items-center gap-3 mt-6">
                 {course.instructor.image && (
-                  <Image src={course.instructor.image} alt={course.instructor.name ?? ""} width={32} height={32} className="rounded-full" />
+                  <Image src={course.instructor.image} alt={course.instructor.name ?? ""} width={32} height={32} unoptimized className="rounded-full" />
                 )}
                 <span className="text-sm text-white/70">
                   Преподаватель: <span className="text-white font-medium">{course.instructor.name}</span>
@@ -189,7 +189,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <div className="bg-white text-text rounded-2xl p-6 shadow-xl h-fit">
               {course.imageUrl && (
                 <div className="relative aspect-video rounded-xl overflow-hidden mb-4">
-                  <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
+                  <Image src={course.imageUrl} alt={course.title} fill unoptimized className="object-cover" />
                 </div>
               )}
               <div className="text-3xl font-bold text-primary font-display mb-4">
@@ -267,7 +267,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   <div key={review.id} className="bg-white rounded-xl p-5 border border-gray-100">
                     <div className="flex items-center gap-3 mb-3">
                       {review.user.image && (
-                        <Image src={review.user.image} alt={review.user.name ?? ""} width={36} height={36} className="rounded-full" />
+                        <Image src={review.user.image} alt={review.user.name ?? ""} width={36} height={36} unoptimized className="rounded-full" />
                       )}
                       <div>
                         <div className="text-sm font-medium text-text">{review.user.name}</div>

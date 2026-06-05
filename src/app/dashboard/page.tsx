@@ -71,7 +71,7 @@ export default async function DashboardPage() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center gap-4 mb-10">
           {session.user.image && (
-            <Image src={session.user.image} alt={session.user.name ?? ""} width={56} height={56} className="rounded-full" />
+            <Image src={session.user.image} alt={session.user.name ?? ""} width={56} height={56} unoptimized className="rounded-full" />
           )}
           <div>
             <h1 className="font-display text-3xl font-bold text-primary">
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
                 <div key={enrollment.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                   {enrollment.course.imageUrl ? (
                     <div className="relative aspect-video">
-                      <Image src={enrollment.course.imageUrl} alt={enrollment.course.title} fill className="object-cover" />
+                      <Image src={enrollment.course.imageUrl} alt={enrollment.course.title} fill unoptimized className="object-cover" />
                     </div>
                   ) : (
                     <div className="aspect-video bg-primary/5 flex items-center justify-center">
