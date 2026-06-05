@@ -1,31 +1,45 @@
+/**
+ * Kinescope Webhook (использует путь /api/mux/webhook для обратной совместимости)
+ * Kinescope отправляет событие video.done когда видео обработано
+ *
+ * Настройки вебхука в Kinescope: https://kinescope.io/settings/webhooks
+ * Endpoint: https://yourdomain.ru/api/mux/webhook
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { mux } from "@/lib/mux";
+import { parseDuration } from "@/lib/kinescope";
+
+interface KinescopeWebhookEvent {
+  event: "video.done" | "video.failed" | "video.processing";
+  data: {
+    id: string;
+    status: string;
+    duration?: number;
+  };
+}
 
 export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const signature = req.headers.get("mux-signature");
+  let event: KinescopeWebhookEvent;
 
-  // Verify webhook signature
   try {
-    mux.webhooks.verifySignature(body, req.headers as never, process.env.MUX_WEBHOOK_SECRET!);
+    event = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const event = JSON.parse(body);
+  if (event.event === "video.done") {
+    const videoId   = event.data.id;
+    const duration  = parseDuration(event.data.duration);
 
-  if (event.type === "video.asset.ready") {
-    const assetId = event.data.id as string;
-    const playbackId = (event.data.playback_ids?.[0]?.id ?? "") as string;
-    const duration = Math.floor((event.data.duration ?? 0) as number);
-
-    if (playbackId) {
-      await prisma.lesson.updateMany({
-        where: { muxAssetId: assetId },
-        data: { muxPlaybackId: playbackId, duration },
-      });
-    }
+    // muxAssetId хранит Kinescope videoId
+    // muxPlaybackId хранит тот же ID (используется плеером)
+    await prisma.lesson.updateMany({
+      where: { muxAssetId: videoId },
+      data: {
+        muxPlaybackId: videoId, // playbackId = videoId для Kinescope
+        duration,
+      },
+    });
   }
 
   return NextResponse.json({ received: true });

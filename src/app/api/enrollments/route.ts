@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { createPayment } from "@/lib/yookassa";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Course not found" }, { status: 404 });
   }
 
-  // Free course -- enroll immediately
+  // Бесплатный курс — сразу записываем без оплаты
   if (course.isFree || !course.price || Number(course.price) === 0) {
     await prisma.enrollment.upsert({
       where: { userId_courseId: { userId: session.user.id!, courseId } },
@@ -29,24 +29,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL(`/learn/${course.slug}`, req.url));
   }
 
-  // Paid course -- create Stripe Checkout session
-  const checkoutSession = await stripe.checkout.sessions.create({
-    mode: "payment",
-    line_items: [
-      {
-        price_data: {
-          currency: "rub",
-          product_data: { name: course.title },
-          unit_amount: Math.round(Number(course.price) * 100),
-        },
-        quantity: 1,
+  // Платный курс — создаём платёж в ЮКассе
+  try {
+    const payment = await createPayment({
+      amount: Number(course.price),
+      description: `Курс «${course.title}»`,
+      returnUrl: `${process.env.AUTH_URL}/dashboard?enrolled=1`,
+      metadata: {
+        userId:   session.user.id!,
+        courseId: course.id,
       },
-    ],
-    metadata: { userId: session.user.id!, courseId },
-    success_url: `${process.env.AUTH_URL}/dashboard?enrolled=1`,
-    cancel_url: `${process.env.AUTH_URL}/courses/${course.slug}`,
-    customer_email: session.user.email ?? undefined,
-  });
+    });
 
-  return NextResponse.redirect(new URL(checkoutSession.url!));
+    return NextResponse.redirect(new URL(payment.confirmation.confirmation_url));
+  } catch (error) {
+    console.error("ЮКасса ошибка:", error);
+    return NextResponse.redirect(
+      new URL(`/courses/${course.slug}?error=payment`, req.url)
+    );
+  }
 }

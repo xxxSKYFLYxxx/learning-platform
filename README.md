@@ -1,7 +1,7 @@
 # КУРС — Онлайн-платформа обучения
 
 > Практические курсы по программированию от реальных разработчиков.  
-> Неоруталистский дизайн · Русский язык · Production-ready стек
+> Российский стек · Работает без VPN · Неорутализм × Конструктивизм
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?logo=next.js)](https://nextjs.org/)
@@ -38,21 +38,26 @@
 | **@prisma/adapter-pg** | — | Prisma 7 Driver Adapter |
 | **NextAuth.js** | v5 beta | Email magic link авторизация |
 
-### Интеграции
+### Интеграции (все российские)
+| Сервис | Назначение | Работает без VPN |
+|---|---|---|
+| **ЮКасса** | Оплата: карты, СБП, ЮMoney, SberPay | ✅ |
+| **Kinescope** | Видеохостинг, HLS стриминг, аналитика | ✅ |
+| **ВКонтакте OAuth** | Вход через VK | ✅ |
+| **Яндекс ID** | Вход через Яндекс | ✅ |
+| **Яндекс Метрика** | Веб-аналитика, вебвизор, цели | ✅ |
+| **Resend** | Email magic link | ✅ |
+| **Sanity CMS** | Контент курсов | ✅ |
+| **@react-pdf/renderer** | PDF-сертификаты | ✅ |
+
+### Хостинг (рекомендуемый российский)
 | Сервис | Назначение |
 |---|---|
-| **Stripe** | Оплата курсов + webhooks |
-| **Mux** | Видео-хостинг, адаптивный стриминг, прогресс просмотра |
-| **Resend** | Транзакционные email (magic link) |
-| **Sanity** | Headless CMS для контента курсов |
-| **Pexels CDN** | Стоковые фотографии для превью |
-| **@react-pdf/renderer** | Генерация PDF-сертификатов |
-
-### CI/CD
-| Инструмент | Назначение |
-|---|---|
-| **Vercel** | Деплой и хостинг |
-| **GitHub Actions** | Lint → TypeCheck → Build |
+| **Timeweb Cloud** | VPS / облачный деплой |
+| **Selectel** | Облачная платформа, S3-хранилище |
+| **Яндекс Cloud** | Managed PostgreSQL, Functions |
+| **ISPmanager** | Панель управления сервером |
+| **GitHub Actions** | CI/CD: lint → typecheck → build |
 | **Docker Compose** | PostgreSQL для локальной разработки |
 
 ---
@@ -281,11 +286,15 @@ vercel --prod            # Деплой production
 | `AUTH_URL` | ✅ | Базовый URL (`https://yourdomain.com`) |
 | `RESEND_API_KEY` | ✅ | Для отправки magic link email |
 | `EMAIL_FROM` | ✅ | Email отправителя |
-| `STRIPE_SECRET_KEY` | Оплата | `sk_test_...` или `sk_live_...` |
-| `STRIPE_WEBHOOK_SECRET` | Оплата | `whsec_...` |
-| `MUX_TOKEN_ID` | Видео | ID токена Mux |
-| `MUX_TOKEN_SECRET` | Видео | Секрет токена Mux |
-| `MUX_WEBHOOK_SECRET` | Видео | Секрет вебхука Mux |
+| `VK_CLIENT_ID` | ВКонтакте вход | ID приложения vk.com |
+| `VK_CLIENT_SECRET` | ВКонтакте вход | Защищённый ключ |
+| `YANDEX_CLIENT_ID` | Яндекс ID | ID приложения oauth.yandex.ru |
+| `YANDEX_CLIENT_SECRET` | Яндекс ID | Пароль приложения |
+| `YOOKASSA_SHOP_ID` | Оплата | ID магазина ЮКасса |
+| `YOOKASSA_SECRET_KEY` | Оплата | Секретный ключ ЮКасса |
+| `KINESCOPE_API_KEY` | Видео | API-ключ Kinescope |
+| `KINESCOPE_PROJECT_ID` | Видео | ID проекта Kinescope |
+| `NEXT_PUBLIC_YANDEX_METRIKA_ID` | Аналитика | Номер счётчика Метрики |
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | CMS | ID проекта Sanity |
 | `NEXT_PUBLIC_SANITY_DATASET` | CMS | `production` |
 

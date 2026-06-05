@@ -1,61 +1,81 @@
 "use client";
 
-import MuxPlayer from "@mux/mux-player-react";
-import { useCallback, useRef } from "react";
+/**
+ * Kinescope Player — российский видеохостинг
+ * Документация: https://kinescope.io/docs/player
+ */
+import { useCallback, useRef, useEffect } from "react";
+import { getEmbedUrl } from "@/lib/kinescope";
 
 interface Props {
-  playbackId: string;
+  videoId: string; // Kinescope video ID
   lessonId: string;
   initialTime?: number;
   onComplete?: () => void;
 }
 
-const SAVE_INTERVAL_SEC = 10;
+const SAVE_INTERVAL_MS = 10_000; // Сохраняем прогресс каждые 10 секунд
 
-export function LessonPlayer({ playbackId, lessonId, initialTime = 0, onComplete }: Props) {
-  const lastSavedRef = useRef(0);
-  const completedRef = useRef(false);
+export function LessonPlayer({ videoId, lessonId, onComplete }: Props) {
+  const savedAtRef    = useRef(0);
+  const completedRef  = useRef(false);
+  const timerRef      = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const saveProgress = useCallback(
     async (watchedSeconds: number, completed = false) => {
       await fetch("/api/progress", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lessonId, watchedSeconds, completed }),
+        body:    JSON.stringify({ lessonId, watchedSeconds, completed }),
       });
     },
     [lessonId]
   );
 
-  const handleTimeUpdate = useCallback(
-    (e: Event) => {
-      const video = e.target as HTMLVideoElement;
-      const current = Math.floor(video.currentTime);
-      if (current - lastSavedRef.current >= SAVE_INTERVAL_SEC) {
-        lastSavedRef.current = current;
-        saveProgress(current);
-      }
-    },
-    [saveProgress]
-  );
+  // Heartbeat — сохраняем прогресс пока видео воспроизводится
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      savedAtRef.current += SAVE_INTERVAL_MS / 1000;
+      saveProgress(savedAtRef.current);
+    }, SAVE_INTERVAL_MS);
 
-  const handleEnded = useCallback(async () => {
-    if (completedRef.current) return;
-    completedRef.current = true;
-    const video = document.querySelector("mux-player")?.shadowRoot?.querySelector("video");
-    await saveProgress(Math.floor(video?.duration ?? 0), true);
-    onComplete?.();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [saveProgress]);
+
+  // Слушаем postMessage от Kinescope iframe
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.origin !== "https://kinescope.io") return;
+
+      const { event, data } = e.data ?? {};
+
+      if (event === "timeupdate" && data?.currentTime) {
+        savedAtRef.current = Math.floor(data.currentTime);
+      }
+
+      if ((event === "ended" || event === "complete") && !completedRef.current) {
+        completedRef.current = true;
+        if (timerRef.current) clearInterval(timerRef.current);
+        saveProgress(savedAtRef.current, true);
+        onComplete?.();
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [saveProgress, onComplete]);
 
   return (
-    <MuxPlayer
-      playbackId={playbackId}
-      startTime={initialTime}
-      streamType="on-demand"
-      className="w-full aspect-video rounded-xl overflow-hidden bg-black"
-      accentColor="#C9A96E"
-      onTimeUpdate={handleTimeUpdate}
-      onEnded={handleEnded}
-    />
+    <div className="relative w-full aspect-video bg-black rounded-none overflow-hidden border-2 border-[#0F0F0F]">
+      <iframe
+        src={`${getEmbedUrl(videoId)}?autoplay=0`}
+        className="absolute inset-0 w-full h-full"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer"
+        allowFullScreen
+        referrerPolicy="origin"
+      />
+    </div>
   );
 }

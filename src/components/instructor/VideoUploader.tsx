@@ -1,70 +1,109 @@
 "use client";
 
+/**
+ * Загрузка видео в Kinescope
+ * Прямая загрузка из браузера через signed upload URL
+ */
 import { useRef, useState } from "react";
-import { Upload, Loader2, CheckCircle } from "lucide-react";
+import { Upload, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 interface Props {
   lessonId: string;
+  lessonTitle?: string;
 }
 
-type Status = "idle" | "uploading" | "done" | "error";
+type Status = "idle" | "preparing" | "uploading" | "done" | "error";
 
-export function VideoUploader({ lessonId }: Props) {
-  const [status, setStatus] = useState<Status>("idle");
+export function VideoUploader({ lessonId, lessonTitle }: Props) {
+  const [status,   setStatus]   = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
+  const [errorMsg, setErrorMsg] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
-    setStatus("uploading");
+    setStatus("preparing");
     setProgress(0);
+    setErrorMsg("");
 
-    // Get signed upload URL from Mux
-    const res = await fetch("/api/mux/upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lessonId }),
-    });
+    try {
+      // 1. Получаем URL загрузки от Kinescope через наш API
+      const res = await fetch("/api/kinescope/upload", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ lessonId, title: lessonTitle }),
+      });
 
-    if (!res.ok) {
+      if (!res.ok) throw new Error("Не удалось создать сессию загрузки");
+      const { uploadUrl } = await res.json();
+
+      // 2. Загружаем файл напрямую в Kinescope
+      setStatus("uploading");
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`HTTP ${xhr.status}`));
+        };
+
+        xhr.onerror = () => reject(new Error("Ошибка сети"));
+        xhr.open("PUT", uploadUrl);
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.send(file);
+      });
+
+      setStatus("done");
+    } catch (err) {
       setStatus("error");
-      return;
+      setErrorMsg(err instanceof Error ? err.message : "Неизвестная ошибка");
     }
-
-    const { uploadUrl } = await res.json();
-
-    // Upload directly to Mux
-    const xhr = new XMLHttpRequest();
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
-    };
-    xhr.onload = () => {
-      if (xhr.status === 200 || xhr.status === 201) {
-        setStatus("done");
-      } else {
-        setStatus("error");
-      }
-    };
-    xhr.onerror = () => setStatus("error");
-    xhr.open("PUT", uploadUrl);
-    xhr.send(file);
   };
 
   if (status === "done") {
     return (
-      <div className="flex items-center gap-1.5 text-xs text-success">
-        <CheckCircle className="w-3.5 h-3.5" /> Загружено
+      <div className="flex items-center gap-1.5 text-xs text-[#1A9E6E]" style={{ fontFamily: "var(--font-mono)" }}>
+        <CheckCircle className="w-3.5 h-3.5" />
+        Загружено в Kinescope
       </div>
     );
   }
 
-  if (status === "uploading") {
+  if (status === "error") {
     return (
-      <div className="flex items-center gap-2 text-xs text-muted w-32">
-        <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
-        <div className="flex-1 bg-gray-100 rounded-full h-1.5">
-          <div className="bg-secondary h-1.5 rounded-full transition-all" style={{ width: `${progress}%` }} />
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-1.5 text-xs text-[#D4402F]" style={{ fontFamily: "var(--font-mono)" }}>
+          <AlertCircle className="w-3.5 h-3.5" />
+          {errorMsg}
         </div>
-        <span className="shrink-0">{progress}%</span>
+        <button onClick={() => setStatus("idle")} className="text-[10px] text-[#D4402F] hover:underline text-left" style={{ fontFamily: "var(--font-mono)" }}>
+          Попробовать снова
+        </button>
+      </div>
+    );
+  }
+
+  if (status === "uploading" || status === "preparing") {
+    return (
+      <div className="flex items-center gap-2 min-w-[140px]" style={{ fontFamily: "var(--font-mono)" }}>
+        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D4402F] shrink-0" />
+        <div className="flex-1">
+          <div className="flex justify-between text-[10px] text-[#787068] mb-1">
+            <span>{status === "preparing" ? "Подготовка..." : "Загрузка..."}</span>
+            <span>{progress}%</span>
+          </div>
+          <div className="w-full bg-[#E0DDD8] rounded-full h-1.5">
+            <div
+              className="bg-[#D4402F] h-1.5 rounded-full transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
       </div>
     );
   }
@@ -79,14 +118,16 @@ export function VideoUploader({ lessonId }: Props) {
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);
+          e.target.value = "";
         }}
       />
       <button
         onClick={() => inputRef.current?.click()}
-        className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-muted hover:border-primary hover:text-primary transition-colors shrink-0"
+        className="flex items-center gap-1.5 px-3 py-1.5 border-2 border-[#0F0F0F] text-xs text-[#787068] hover:text-[#0F0F0F] hover:shadow-brutal-sm transition-all"
+        style={{ fontFamily: "var(--font-mono)" }}
       >
         <Upload className="w-3.5 h-3.5" />
-        {status === "error" ? "Повторить" : "Загрузить видео"}
+        Загрузить в Kinescope
       </button>
     </>
   );

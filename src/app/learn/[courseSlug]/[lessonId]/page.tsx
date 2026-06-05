@@ -130,9 +130,8 @@ export default async function LessonPage({
             {/* Player */}
             {lesson.muxPlaybackId ? (
               <LessonPlayer
-                playbackId={lesson.muxPlaybackId}
+                videoId={lesson.muxPlaybackId}
                 lessonId={lesson.id}
-                initialTime={progress?.watchedSeconds ?? 0}
               />
             ) : (
               <div className="aspect-video bg-primary/5 rounded-xl flex items-center justify-center text-muted text-sm">
