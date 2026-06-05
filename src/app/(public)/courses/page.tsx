@@ -3,7 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CourseCard } from "@/components/course/CourseCard";
 import { prisma } from "@/lib/prisma";
 import type { CourseLevel } from "@prisma/client";
-import { Search } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import type { Metadata } from "next";
 
 interface SearchParams { level?: string; isFree?: string; q?: string; sort?: string }
@@ -44,7 +44,7 @@ const LEVELS = [
   { value: "ADVANCED", label: "Продвинутый" },
 ];
 const SORTS = [
-  { value: "", label: "Популярность" },
+  { value: "", label: "По популярности" },
   { value: "newest", label: "Новые" },
   { value: "price_asc", label: "Цена ↑" },
   { value: "price_desc", label: "Цена ↓" },
@@ -52,7 +52,7 @@ const SORTS = [
 
 export const metadata: Metadata = {
   title: "Каталог курсов",
-  description: "Все курсы по программированию на платформе КУРС",
+  description: "Все курсы по программированию на платформе КУРС — JavaScript, React, Python, TypeScript и другие",
 };
 
 export default async function CoursesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -69,95 +69,88 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
     return `/courses${qs.toString() ? `?${qs}` : ""}`;
   };
 
+  const isFiltered = !!(params.level || params.isFree || params.q);
+
   return (
-    <div style={{ background: "#0D0B09", minHeight: "100vh" }}>
+    <div style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
       <Header />
       <main>
-        {/* Header */}
-        <div style={{ background: "#0A0807", borderBottom: "1px solid #1F1C1A" }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <p
-              className="text-[10px] font-black tracking-[0.25em] mb-1"
-              style={{ fontFamily: "var(--font-mono)", color: "#6E675E" }}
-            >
-              КАТАЛОГ
+
+        {/* ── Hero bar ── */}
+        <div style={{ background: "var(--c-s1)", borderBottom: "1px solid var(--c-border)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 24px 40px" }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 10 }}>
+              Каталог
             </p>
-            <h1
-              className="text-4xl font-black mb-6"
-              style={{ fontFamily: "var(--font-display)", color: "#F0EBE3" }}
-            >
+            <h1 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 24, lineHeight: 1.1 }}>
               Все курсы
             </h1>
 
             {/* Search */}
-            <form method="GET" className="relative max-w-xl">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#6E675E" }} />
+            <form method="GET" style={{ position: "relative", maxWidth: 520 }}>
+              <Search size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--c-t3)", pointerEvents: "none" }} />
               <input
                 name="q"
                 defaultValue={params.q ?? ""}
-                placeholder="Поиск по названию или описанию..."
-                className="input-dark w-full pl-10 pr-4 py-3 text-sm"
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  background: "#141210",
-                  border: "1px solid #262220",
-                  color: "#F0EBE3",
-                }}
+                placeholder="Поиск по названию или теме..."
+                className="input-dark"
+                style={{ width: "100%", paddingLeft: 42, paddingRight: 16, paddingTop: 11, paddingBottom: 11, fontSize: 14, fontFamily: "var(--font-sans)", boxSizing: "border-box" }}
               />
             </form>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3 mb-8 pb-6" style={{ borderBottom: "1px solid #1F1C1A" }}>
-            <div className="flex flex-wrap gap-2">
-              {LEVELS.map((l) => {
-                const active = (params.level ?? "") === l.value;
-                return (
-                  <a
-                    key={l.value}
-                    href={buildHref({ level: l.value })}
-                    className="px-3 py-1.5 text-[11px] font-black tracking-wide transition-all"
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      background: active ? "#E8351D" : "transparent",
-                      color: active ? "#F0EBE3" : "#6E675E",
-                      border: `1px solid ${active ? "#E8351D" : "#262220"}`,
-                    }}
-                  >
-                    {l.label}
-                  </a>
-                );
-              })}
-              <a
-                href={buildHref({ isFree: params.isFree === "true" ? "" : "true" })}
-                className="px-3 py-1.5 text-[11px] font-black tracking-wide transition-all"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  background: params.isFree === "true" ? "#1EA876" : "transparent",
-                  color: params.isFree === "true" ? "#F0EBE3" : "#6E675E",
-                  border: `1px solid ${params.isFree === "true" ? "#1EA876" : "#262220"}`,
-                }}
-              >
-                Бесплатные
-              </a>
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              <span className="text-xs hidden sm:block" style={{ fontFamily: "var(--font-mono)", color: "#3A3530" }}>
-                Сорт.:
-              </span>
+        {/* ── Filters + results ── */}
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
+
+          {/* Filter row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "20px 0", borderBottom: "1px solid var(--c-border)" }}>
+            <SlidersHorizontal size={14} style={{ color: "var(--c-t3)" }} />
+
+            {/* Level filters */}
+            {LEVELS.map((l) => {
+              const active = (params.level ?? "") === l.value;
+              return (
+                <a
+                  key={l.value}
+                  href={buildHref({ level: l.value })}
+                  className={active ? "filter-active" : "filter-btn"}
+                  style={{ padding: "6px 14px", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textDecoration: "none", letterSpacing: "0.03em" }}
+                >
+                  {l.label}
+                </a>
+              );
+            })}
+
+            {/* Free toggle */}
+            <a
+              href={buildHref({ isFree: params.isFree === "true" ? "" : "true" })}
+              style={{
+                padding: "6px 14px", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textDecoration: "none",
+                background: params.isFree === "true" ? "rgba(31,158,110,0.15)" : "transparent",
+                color: params.isFree === "true" ? "var(--c-green)" : "var(--c-t3)",
+                border: `1px solid ${params.isFree === "true" ? "var(--c-green)" : "var(--c-border)"}`,
+                transition: "all 0.15s",
+              }}
+            >
+              Бесплатные
+            </a>
+
+            {/* Sort */}
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 11, color: "var(--c-t4)", fontFamily: "var(--font-mono)" }}>Сортировка:</span>
               {SORTS.map((s) => {
                 const active = (params.sort ?? "") === s.value;
                 return (
                   <a
                     key={s.value}
                     href={buildHref({ sort: s.value })}
-                    className="px-3 py-1.5 text-[11px] transition-colors"
                     style={{
-                      fontFamily: "var(--font-sans)",
-                      color: active ? "#F0EBE3" : "#6E675E",
-                      border: `1px solid ${active ? "#3A3530" : "transparent"}`,
+                      fontSize: 12, fontFamily: "var(--font-sans)", textDecoration: "none", padding: "4px 10px",
+                      color: active ? "var(--c-t1)" : "var(--c-t3)",
+                      fontWeight: active ? 700 : 400,
+                      borderBottom: active ? "2px solid var(--c-red)" : "2px solid transparent",
+                      transition: "all 0.15s",
                     }}
                   >
                     {s.label}
@@ -167,28 +160,32 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
             </div>
           </div>
 
-          {/* Count */}
-          <p className="text-xs mb-6" style={{ fontFamily: "var(--font-mono)", color: "#3A3530" }}>
-            Найдено: {courses.length}
-            {params.q && <span style={{ color: "#6E675E" }}> по запросу «{params.q}»</span>}
-          </p>
+          {/* Results meta */}
+          <div style={{ padding: "14px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <p style={{ fontSize: 12, color: "var(--c-t4)", fontFamily: "var(--font-mono)", margin: 0 }}>
+              Найдено: <span style={{ color: "var(--c-t2)" }}>{courses.length}</span>
+              {params.q && <span style={{ color: "var(--c-t3)" }}> по запросу «{params.q}»</span>}
+            </p>
+            {isFiltered && (
+              <a href="/courses" style={{ fontSize: 12, color: "var(--c-red)", textDecoration: "none", fontFamily: "var(--font-display)", fontWeight: 700 }}>
+                Сбросить фильтры ×
+              </a>
+            )}
+          </div>
 
+          {/* Grid */}
           {courses.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, paddingBottom: 80 }}>
               {courses.map((course) => <CourseCard key={course.id} course={course} />)}
             </div>
           ) : (
-            <div className="text-center py-24" style={{ border: "1px dashed #262220" }}>
-              <p className="text-4xl mb-4" style={{ color: "#3A3530" }}>—</p>
-              <p className="mb-4" style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}>
+            <div style={{ textAlign: "center", padding: "96px 0", border: "1px dashed var(--c-border)", marginBottom: 80 }}>
+              <div style={{ fontSize: 40, color: "var(--c-border-hi)", marginBottom: 16 }}>—</div>
+              <p style={{ fontSize: 15, color: "var(--c-t3)", fontFamily: "var(--font-sans)", marginBottom: 20 }}>
                 По вашему запросу ничего не найдено
               </p>
-              <a
-                href="/courses"
-                className="text-sm font-black"
-                style={{ fontFamily: "var(--font-display)", color: "#E8351D" }}
-              >
-                Сбросить фильтры
+              <a href="/courses" style={{ fontSize: 13, fontWeight: 900, color: "var(--c-red)", textDecoration: "none", fontFamily: "var(--font-display)" }}>
+                Сбросить фильтры →
               </a>
             </div>
           )}

@@ -5,187 +5,115 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
-function LogoDark() {
-  return (
-    <Link href="/" className="inline-flex items-center select-none group">
-      <span
-        className="inline-block font-black tracking-tight px-2 py-0.5 text-base transition-all"
-        style={{
-          fontFamily: "var(--font-display)",
-          background: "#E8351D",
-          color: "#F0EBE3",
-        }}
-      >
-        К
-      </span>
-      <span
-        className="inline-block font-black tracking-tight px-1.5 py-0.5 text-base border border-l-0 transition-all"
-        style={{
-          fontFamily: "var(--font-display)",
-          borderColor: "#3A3530",
-          color: "#F0EBE3",
-          background: "transparent",
-        }}
-      >
-        УРС
-      </span>
-    </Link>
-  );
-}
-
 export function Header() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
 
   return (
-    <header
-      className="sticky top-0 z-50"
-      style={{
-        background: "rgba(13, 11, 9, 0.92)",
-        backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #262220",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-6">
-        <LogoDark />
+    <header style={{
+      position: "sticky", top: 0, zIndex: 50,
+      background: "rgba(14,12,10,0.88)",
+      backdropFilter: "blur(16px)",
+      borderBottom: "1px solid var(--c-border)",
+    }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", height: 56, display: "flex", alignItems: "center", gap: 32 }}>
 
-        <nav className="hidden md:flex items-center gap-6 ml-4">
-          <Link
-            href="/courses"
-            className="text-sm font-medium transition-colors hover:text-[#F0EBE3]"
-            style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}
-          >
-            Курсы
-          </Link>
-          <Link
-            href="/about"
-            className="text-sm font-medium transition-colors hover:text-[#F0EBE3]"
-            style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}
-          >
-            О нас
-          </Link>
+        {/* Logo */}
+        <Link href="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}>
+          <span style={{
+            fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 15,
+            padding: "3px 8px", background: "var(--c-red)", color: "var(--c-t1)",
+            letterSpacing: "-0.02em",
+          }}>К</span>
+          <span style={{
+            fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 15,
+            padding: "3px 7px",
+            border: "1px solid var(--c-border-hi)", borderLeft: "none",
+            color: "var(--c-t1)", letterSpacing: "-0.02em",
+          }}>УРС</span>
+        </Link>
+
+        {/* Desktop nav */}
+        <nav style={{ display: "flex", alignItems: "center", gap: 24, flex: 1 }}>
+          {[
+            { href: "/courses", label: "Курсы" },
+            { href: "/about", label: "О нас" },
+            { href: "/contact", label: "Контакты" },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} className="link-cream" style={{
+              fontSize: 14, fontWeight: 500,
+              fontFamily: "var(--font-sans)",
+              textDecoration: "none",
+            }}>
+              {label}
+            </Link>
+          ))}
           {session?.user?.role === "INSTRUCTOR" && (
-            <Link
-              href="/instructor"
-              className="text-sm font-medium transition-colors hover:text-[#F0EBE3]"
-              style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}
-            >
+            <Link href="/instructor" className="link-cream" style={{ fontSize: 14, fontWeight: 500, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
               Преподаватель
             </Link>
           )}
           {session?.user?.role === "ADMIN" && (
-            <Link
-              href="/admin"
-              className="text-sm font-medium transition-colors hover:text-[#E8351D]"
-              style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}
-            >
+            <Link href="/admin" className="link-muted" style={{ fontSize: 13, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
               Админ
             </Link>
           )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
+        {/* Auth */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
           {session ? (
             <>
-              <Link
-                href="/dashboard"
-                className="hidden md:block text-sm font-medium transition-colors hover:text-[#F0EBE3]"
-                style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}
-              >
+              <Link href="/dashboard" className="link-cream" style={{ fontSize: 14, fontWeight: 500, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
                 {session.user?.name?.split(" ")[0] ?? "Кабинет"}
               </Link>
-              <button
-                onClick={() => signOut()}
-                className="hidden md:block text-xs transition-colors hover:text-[#E8351D]"
-                style={{ fontFamily: "var(--font-mono)", color: "#6E675E" }}
-              >
+              <button onClick={() => signOut()} className="link-muted" style={{ fontSize: 12, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>
                 [выйти]
               </button>
             </>
           ) : (
-            <Link
-              href="/login"
-              className="px-5 py-2 text-sm font-black border transition-all hover:glow-red"
-              style={{
-                fontFamily: "var(--font-display)",
-                background: "#E8351D",
-                color: "#F0EBE3",
-                borderColor: "#E8351D",
-                boxShadow: "0 0 16px rgba(232,53,29,0.25)",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow =
-                  "0 0 24px rgba(232,53,29,0.5), 0 0 48px rgba(232,53,29,0.2)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow =
-                  "0 0 16px rgba(232,53,29,0.25)";
-              }}
-            >
+            <Link href="/login" className="btn-red" style={{
+              padding: "7px 20px", fontSize: 13, fontWeight: 900,
+              fontFamily: "var(--font-display)", textDecoration: "none",
+              letterSpacing: "0.02em",
+            }}>
               Войти
             </Link>
           )}
+
+          {/* Burger */}
           <button
-            className="md:hidden p-1 transition-colors"
-            style={{ color: "#6E675E" }}
             onClick={() => setOpen(!open)}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-t3)", padding: 4, display: "none" }}
+            className="burger-btn"
           >
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
+      {/* Mobile menu */}
       {open && (
-        <div
-          className="md:hidden px-4 py-4 flex flex-col gap-4"
-          style={{ background: "#0D0B09", borderTop: "1px solid #262220" }}
-        >
-          <Link
-            href="/courses"
-            className="text-sm font-medium"
-            style={{ color: "#F0EBE3" }}
-            onClick={() => setOpen(false)}
-          >
-            Курсы
-          </Link>
-          <Link
-            href="/about"
-            className="text-sm font-medium"
-            style={{ color: "#6E675E" }}
-            onClick={() => setOpen(false)}
-          >
-            О нас
-          </Link>
+        <div style={{ background: "var(--c-bg)", borderTop: "1px solid var(--c-border)", padding: "16px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+          {["/courses", "/about", "/contact"].map((href) => (
+            <Link key={href} href={href} onClick={() => setOpen(false)} style={{ color: "var(--c-t1)", fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
+              {href === "/courses" ? "Курсы" : href === "/about" ? "О нас" : "Контакты"}
+            </Link>
+          ))}
           {session ? (
             <>
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium"
-                style={{ color: "#F0EBE3" }}
-                onClick={() => setOpen(false)}
-              >
-                Кабинет
-              </Link>
-              <button
-                onClick={() => signOut()}
-                className="text-sm text-left"
-                style={{ color: "#E8351D" }}
-              >
-                Выйти
-              </button>
+              <Link href="/dashboard" onClick={() => setOpen(false)} style={{ color: "var(--c-t1)", fontSize: 15, textDecoration: "none" }}>Кабинет</Link>
+              <button onClick={() => signOut()} style={{ color: "var(--c-red)", textAlign: "left", background: "none", border: "none", fontSize: 14, cursor: "pointer" }}>Выйти</button>
             </>
           ) : (
-            <Link
-              href="/login"
-              className="text-sm font-black"
-              style={{ color: "#E8351D" }}
-              onClick={() => setOpen(false)}
-            >
-              Войти →
-            </Link>
+            <Link href="/login" onClick={() => setOpen(false)} style={{ color: "var(--c-red)", fontSize: 15, fontWeight: 900, textDecoration: "none" }}>Войти →</Link>
           )}
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 768px) { .burger-btn { display: block !important; } nav { display: none !important; } }
+      `}</style>
     </header>
   );
 }
