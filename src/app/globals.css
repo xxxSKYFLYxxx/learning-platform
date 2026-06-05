@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Core palette */
+  /* Core palette — kept for legacy pages */
   --color-ink:     #0F0F0F;
   --color-page:    #FAFAF7;
   --color-accent:  #D4402F;
@@ -13,44 +13,168 @@
   --color-success: #1A9E6E;
   --color-error:   #D63B2F;
 
-  /* Legacy aliases — не ломают app-страницы */
   --color-primary:   #0F0F0F;
   --color-secondary: #D4402F;
   --color-text:      #0F0F0F;
 
-  /* Fonts */
   --font-display: var(--font-unbounded);
   --font-sans:    var(--font-manrope);
   --font-mono:    var(--font-space-mono);
 }
 
+/* ── Base ──────────────────────────────────────────────── */
 body {
-  color: var(--color-ink);
-  background: var(--color-page);
+  color: #F0EBE3;
+  background: #0D0B09;
   font-family: var(--font-sans);
 }
 
-/* Hero typography animation */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(36px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.hero-word {
-  opacity: 0;
-  animation: slideUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* ── Dark design tokens (hardcoded for new UI) ─────────── */
+:root {
+  --dk-bg:        #0D0B09;
+  --dk-surface:   #141210;
+  --dk-surface2:  #1A1714;
+  --dk-border:    #262220;
+  --dk-border-hi: #3A3530;
+  --dk-cream:     #F0EBE3;
+  --dk-muted:     #6E675E;
+  --dk-muted-hi:  #9A9088;
+  --dk-red:       #E8351D;
+  --dk-red-dim:   rgba(232, 53, 29, 0.12);
+  --dk-red-glow:  rgba(232, 53, 29, 0.35);
+  --dk-amber:     #E8A020;
 }
 
-/* Tech marquee */
+/* ── Animations ────────────────────────────────────────── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(48px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
+@keyframes scanline {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(100vh); }
+}
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92%       { opacity: 1; }
+  93%       { opacity: 0.8; }
+  94%       { opacity: 1; }
+  96%       { opacity: 0.9; }
+  97%       { opacity: 1; }
+}
+
+/* ── Animation helpers ─────────────────────────────────── */
+.hero-word {
+  opacity: 0;
+  animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.hero-fade {
+  opacity: 0;
+  animation: fadeIn 1.2s ease forwards;
+}
+.hero-left {
+  opacity: 0;
+  animation: slideLeft 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Marquee ───────────────────────────────────────────── */
 .animate-marquee {
-  animation: marquee 32s linear infinite;
+  animation: marquee 36s linear infinite;
   will-change: transform;
 }
 
-/* Brutalist shadow helpers */
-.shadow-brutal   { box-shadow: 4px 4px 0 var(--color-ink); }
-.shadow-brutal-r { box-shadow: 3px 3px 0 var(--color-accent); }
-.shadow-brutal-sm{ box-shadow: 2px 2px 0 var(--color-ink); }
+/* ── Brutalist shadow helpers (legacy) ─────────────────── */
+.shadow-brutal    { box-shadow: 4px 4px 0 #0F0F0F; }
+.shadow-brutal-r  { box-shadow: 3px 3px 0 #D4402F; }
+.shadow-brutal-sm { box-shadow: 2px 2px 0 #0F0F0F; }
+
+/* ── Dark glow helpers ─────────────────────────────────── */
+.glow-red    { box-shadow: 0 0 24px rgba(232,53,29,0.3), 0 0 64px rgba(232,53,29,0.1); }
+.glow-red-sm { box-shadow: 0 0 10px rgba(232,53,29,0.2); }
+.glow-border { box-shadow: 0 0 0 1px rgba(232,53,29,0.5), 0 0 20px rgba(232,53,29,0.15); }
+.text-glow-red { text-shadow: 0 0 40px rgba(232,53,29,0.6), 0 0 80px rgba(232,53,29,0.25); }
+
+/* ── Grain overlay ─────────────────────────────────────── */
+.grain::before {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Course card hover (CSS-only) ─────────────────────── */
+.course-card {
+  background: #141210;
+  border: 1px solid #262220;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.course-card:hover {
+  border-color: #E8351D;
+  box-shadow: 0 0 20px rgba(232,53,29,0.1), 0 8px 32px rgba(0,0,0,0.35);
+}
+
+/* ── Button / link hover glow (CSS-only) ──────────────── */
+.btn-red {
+  background: #E8351D;
+  color: #F0EBE3;
+  box-shadow: 0 0 16px rgba(232,53,29,0.25);
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.btn-red:hover {
+  box-shadow: 0 0 28px rgba(232,53,29,0.5), 0 0 60px rgba(232,53,29,0.15);
+}
+.btn-outline-dark {
+  color: #F0EBE3;
+  border: 1px solid #3A3530;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline-dark:hover {
+  border-color: #F0EBE3;
+}
+
+/* ── Feature card hover ───────────────────────────────── */
+.feature-card {
+  background: #0D0B09;
+  transition: background 0.2s;
+}
+.feature-card:hover {
+  background: #141210;
+}
+
+/* ── Dark input focus ─────────────────────────────────── */
+.input-dark:focus {
+  border-color: #E8351D !important;
+  outline: none;
+}
+
+/* ── Link muted hover → red ───────────────────────────── */
+.link-muted {
+  color: #6E675E;
+  transition: color 0.15s;
+}
+.link-muted:hover { color: #E8351D; }
+.link-muted-cream { color: #6E675E; transition: color 0.15s; }
+.link-muted-cream:hover { color: #F0EBE3; }
+
+/* ── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0D0B09; }
+::-webkit-scrollbar-thumb { background: #3A3530; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #E8351D; }

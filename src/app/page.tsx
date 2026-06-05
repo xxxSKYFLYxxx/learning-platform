@@ -1,14 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, CheckCircle, Star, Clock, Users } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
 import { CourseCard } from "@/components/course/CourseCard";
 import { formatDuration } from "@/lib/utils";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "КУРС — Онлайн-обучение программированию",
+  description: "Практические курсы по программированию на русском языке. JavaScript, React, TypeScript, Python.",
+};
 
 async function getHomeData() {
-  const [courses, courseCount, enrollmentCount, reviewCount] = await Promise.all([
+  const [courses, courseCount, enrollmentCount] = await Promise.all([
     prisma.course.findMany({
       where: { published: true },
       take: 6,
@@ -18,11 +24,11 @@ async function getHomeData() {
         imageUrl: true, price: true, isFree: true, level: true,
         instructor: { select: { id: true, name: true, image: true } },
         _count: { select: { enrollments: true, reviews: true } },
+        reviews: { select: { rating: true } },
       },
     }),
     prisma.course.count({ where: { published: true } }),
     prisma.enrollment.count(),
-    prisma.review.count(),
   ]);
 
   const instructors = await prisma.user.findMany({
@@ -49,63 +55,118 @@ async function getHomeData() {
   const totalLessons = await prisma.lesson.count();
 
   return {
-    courses: courses.map((c) => ({ ...c, price: c.price ? Number(c.price) : null })),
-    courseCount, enrollmentCount, reviewCount, instructors, reviews, totalLessons,
+    courses: courses.map((c) => ({
+      ...c,
+      price: c.price ? Number(c.price) : null,
+      avgRating: c.reviews.length > 0 ? c.reviews.reduce((a, r) => a + r.rating, 0) / c.reviews.length : undefined,
+    })),
+    courseCount, enrollmentCount, instructors, reviews, totalLessons,
   };
 }
 
 const TECH_TAGS = [
-  { label: "JavaScript", v: "dark" }, { label: "React", v: "accent" },
-  { label: "TypeScript", v: "light" }, { label: "Node.js", v: "dark" },
-  { label: "Next.js", v: "light" }, { label: "Python", v: "accent" },
-  { label: "Git", v: "dark" }, { label: "CSS / Tailwind", v: "light" },
-  { label: "PostgreSQL", v: "accent" }, { label: "Docker", v: "dark" },
-  { label: "GraphQL", v: "light" }, { label: "REST API", v: "accent" },
+  "JavaScript", "React", "TypeScript", "Node.js",
+  "Next.js", "Python", "Git", "CSS / Tailwind",
+  "PostgreSQL", "Docker", "GraphQL", "REST API",
 ];
 
-function tagClass(v: string) {
-  if (v === "dark")   return "bg-[#0F0F0F] text-[#FAFAF7] border-[#0F0F0F]";
-  if (v === "accent") return "bg-[#D4402F] text-[#FAFAF7] border-[#D4402F]";
-  return "bg-white text-[#0F0F0F] border-[#0F0F0F]";
-}
-
 const FEATURES = [
-  { icon: "🎯", title: "Только практика", desc: "Каждый курс — реальный проект, который можно показать работодателю" },
-  { icon: "⚡", title: "Быстро и без воды", desc: "Средний урок — 12 минут. Только суть, никаких отступлений" },
-  { icon: "🏆", title: "Сертификат", desc: "PDF-сертификат с уникальным кодом верификации после каждого курса" },
-  { icon: "♾️", title: "Пожизненный доступ", desc: "Купи раз — учись всю жизнь. Все обновления курсов бесплатно" },
+  { num: "01", title: "Только практика", desc: "Каждый курс — реальный проект. Никакой теории ради теории." },
+  { num: "02", title: "Без воды", desc: "Средний урок — 12 минут. Только суть, никаких отступлений." },
+  { num: "03", title: "Сертификат", desc: "PDF-сертификат с уникальным кодом верификации." },
+  { num: "04", title: "Пожизненный доступ", desc: "Купил раз — учись всю жизнь. Все обновления бесплатно." },
 ];
 
 export default async function HomePage() {
   const { courses, courseCount, enrollmentCount, totalLessons, instructors, reviews } = await getHomeData();
 
   return (
-    <>
+    <div className="grain" style={{ background: "#0D0B09", minHeight: "100vh" }}>
       <Header />
-      <main className="flex-1">
+      <main>
 
         {/* ─── HERO ─── */}
-        <section className="bg-[#FDFCE8] overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-0">
-            <div className="grid lg:grid-cols-[1fr_420px] gap-12 items-start">
+        <section style={{ background: "#0D0B09", position: "relative", overflow: "hidden" }}>
+          {/* Radial red glow top-right */}
+          <div
+            aria-hidden
+            style={{
+              position: "absolute", top: "-20%", right: "-10%",
+              width: "600px", height: "600px", borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(232,53,29,0.07) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }}
+          />
+          {/* Subtle grid */}
+          <div
+            aria-hidden
+            style={{
+              position: "absolute", inset: 0,
+              backgroundImage: "linear-gradient(rgba(38,34,32,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(38,34,32,0.35) 1px, transparent 1px)",
+              backgroundSize: "80px 80px", pointerEvents: "none",
+            }}
+          />
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-0" style={{ position: "relative" }}>
+            <div className="grid lg:grid-cols-[1fr_380px] gap-16 items-start">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 border-2 border-[#0F0F0F] text-[10px] font-black tracking-widest mb-8" style={{ fontFamily: "var(--font-mono)" }}>
-                  🚀 НОВЫЙ КУРС: Next.js Полный курс →
+                {/* Eyebrow */}
+                <div className="hero-fade inline-flex items-center gap-2 mb-10" style={{ animationDelay: "0.05s" }}>
+                  <span
+                    className="px-3 py-1.5 text-[10px] font-black tracking-widest"
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      background: "rgba(232,53,29,0.1)",
+                      color: "#E8351D",
+                      border: "1px solid rgba(232,53,29,0.25)",
+                    }}
+                  >
+                    ▶ НОВЫЙ КУРС: NEXT.JS ПОЛНЫЙ КУРС
+                  </span>
                 </div>
-                <h1 className="leading-[0.88] tracking-tight mb-10" style={{ fontFamily: "var(--font-display)" }}>
-                  <span className="block text-[12vw] sm:text-7xl lg:text-8xl font-black text-[#0F0F0F] hero-word" style={{ animationDelay: "0.1s" }}>УЧИСЬ.</span>
-                  <span className="block text-[12vw] sm:text-7xl lg:text-8xl font-black text-[#D4402F] hero-word" style={{ animationDelay: "0.22s" }}>СОЗДАВАЙ.</span>
-                  <span className="block text-[12vw] sm:text-7xl lg:text-8xl font-black text-[#0F0F0F] hero-word" style={{ animationDelay: "0.34s" }}>РАСТИ.</span>
-                </h1>
-                <div className="flex flex-col sm:flex-row gap-6 items-start">
-                  <p className="text-base text-[#787068] max-w-xs leading-relaxed" style={{ fontFamily: "var(--font-sans)" }}>
-                    Практические курсы от реальных разработчиков. Только живые проекты, никакой теории ради теории.
+
+                {/* Headline */}
+                <div className="mb-10">
+                  <div
+                    className="hero-word text-[13vw] sm:text-[88px] lg:text-[96px] font-black leading-[0.88] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)", color: "#F0EBE3", animationDelay: "0.12s" }}
+                  >
+                    УЧИСЬ.
+                  </div>
+                  <div
+                    className="hero-word text-[13vw] sm:text-[88px] lg:text-[96px] font-black leading-[0.88] tracking-tight text-glow-red"
+                    style={{ fontFamily: "var(--font-display)", color: "#E8351D", animationDelay: "0.26s" }}
+                  >
+                    СОЗДАВАЙ.
+                  </div>
+                  <div
+                    className="hero-word text-[13vw] sm:text-[88px] lg:text-[96px] font-black leading-[0.88] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)", color: "#2E2924", animationDelay: "0.4s" }}
+                  >
+                    РАСТИ.
+                  </div>
+                </div>
+
+                <div className="hero-fade flex flex-col sm:flex-row gap-6 items-start" style={{ animationDelay: "0.65s" }}>
+                  <p
+                    className="text-base leading-relaxed max-w-xs"
+                    style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}
+                  >
+                    Практические курсы от реальных разработчиков. Только живые проекты.
                   </p>
                   <div className="flex gap-3 shrink-0">
-                    <Link href="/courses" className="inline-flex items-center gap-2 px-6 py-3 text-sm font-black bg-[#0F0F0F] text-[#FAFAF7] border-2 border-[#0F0F0F] shadow-brutal hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all" style={{ fontFamily: "var(--font-display)" }}>
-                      Курсы <ArrowRight className="w-4 h-4" />
+                    <Link
+                      href="/courses"
+                      className="btn-red inline-flex items-center gap-2 px-7 py-3.5 text-sm font-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      Все курсы <ArrowRight className="w-4 h-4" />
                     </Link>
-                    <Link href="/courses?isFree=true" className="inline-flex items-center gap-2 px-6 py-3 text-sm font-black bg-transparent text-[#0F0F0F] border-2 border-[#0F0F0F] shadow-brutal hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all" style={{ fontFamily: "var(--font-display)" }}>
+                    <Link
+                      href="/courses?isFree=true"
+                      className="btn-outline-dark inline-flex items-center gap-2 px-7 py-3.5 text-sm font-black"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
                       Бесплатно
                     </Link>
                   </div>
@@ -113,18 +174,37 @@ export default async function HomePage() {
               </div>
 
               {/* Code card */}
-              <div className="hidden lg:flex flex-col justify-end self-end">
-                <div className="bg-[#111111] border-2 border-[#0F0F0F] shadow-[8px_8px_0_#0F0F0F] p-7 text-sm leading-7" style={{ fontFamily: "var(--font-mono)" }}>
-                  <div className="text-[#555] text-xs mb-3 tracking-widest">// твой путь в IT</div>
-                  <div className="text-[#F8F8F2]"><span className="text-[#FF79C6]">const </span><span className="text-[#8BE9FD]">developer </span><span className="text-[#F8F8F2]">= {"{"}</span></div>
-                  <div className="pl-4 text-[#F8F8F2]"><span className="text-[#F1FA8C]">name</span><span>: </span><span className="text-[#F1FA8C]">"Ты"</span><span>,</span></div>
-                  <div className="pl-4 text-[#F8F8F2]"><span className="text-[#F1FA8C]">skills</span><span>: [</span><span className="text-[#F1FA8C]">"JS"</span><span>, </span><span className="text-[#F1FA8C]">"React"</span><span>],</span></div>
-                  <div className="pl-4 text-[#F8F8F2]"><span className="text-[#F1FA8C]">salary</span><span>: </span><span className="text-[#50FA7B]">150_000</span><span>,</span></div>
-                  <div className="text-[#F8F8F2]">{"}"}</div>
-                  <div className="mt-4 pt-4 border-t border-white/10 space-y-1.5">
-                    <div className="text-[#50FA7B]">✓ записался на курс</div>
-                    <div className="text-[#50FA7B]">✓ сдал проект</div>
-                    <div className="text-[#444]">○ получил оффер</div>
+              <div className="hidden lg:block hero-left self-end" style={{ animationDelay: "0.35s" }}>
+                <div
+                  className="text-sm leading-7 p-7"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    background: "#0A0807",
+                    border: "1px solid #262220",
+                    boxShadow: "0 0 40px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  <div style={{ color: "#3A3530", fontSize: "10px", marginBottom: "12px", letterSpacing: "0.1em" }}>
+                    // твой путь в IT
+                  </div>
+                  <div style={{ color: "#9A9088" }}>
+                    <span style={{ color: "#E8351D" }}>const </span>
+                    <span style={{ color: "#6E675E" }}>developer </span>= {"{"}
+                  </div>
+                  <div className="pl-5" style={{ color: "#9A9088" }}>
+                    <span style={{ color: "#F0EBE3" }}>name</span>: <span style={{ color: "#E8A020" }}>&quot;Ты&quot;</span>,
+                  </div>
+                  <div className="pl-5" style={{ color: "#9A9088" }}>
+                    <span style={{ color: "#F0EBE3" }}>skills</span>: [<span style={{ color: "#E8A020" }}>&quot;JS&quot;</span>, <span style={{ color: "#E8A020" }}>&quot;React&quot;</span>],
+                  </div>
+                  <div className="pl-5" style={{ color: "#9A9088" }}>
+                    <span style={{ color: "#F0EBE3" }}>salary</span>: <span style={{ color: "#1EA876" }}>150_000</span>,
+                  </div>
+                  <div style={{ color: "#9A9088" }}>{"}"}</div>
+                  <div className="mt-4 pt-4 space-y-1.5" style={{ borderTop: "1px solid #1F1C1A" }}>
+                    <div style={{ color: "#1EA876" }}>✓ записался на курс</div>
+                    <div style={{ color: "#1EA876" }}>✓ сдал проект</div>
+                    <div style={{ color: "#3A3530" }}>○ получил оффер</div>
                   </div>
                 </div>
               </div>
@@ -132,18 +212,31 @@ export default async function HomePage() {
           </div>
 
           {/* Stats */}
-          <div className="border-t-2 border-[#0F0F0F] mt-16">
-            <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x-2 divide-[#0F0F0F]">
+          <div className="mt-20" style={{ borderTop: "1px solid #1F1C1A" }}>
+            <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4">
               {[
-                { value: `${courseCount}`,       label: "Курсов", sub: "на платформе" },
-                { value: `${totalLessons}`,      label: "Уроков", sub: "суммарно" },
-                { value: `${enrollmentCount}+`,  label: "Записей", sub: "от студентов" },
-                { value: "4.9",                   label: "Рейтинг", sub: "средняя оценка" },
-              ].map((s) => (
-                <div key={s.label} className="px-6 py-7 md:px-8">
-                  <div className="text-3xl md:text-4xl font-bold text-[#0F0F0F]" style={{ fontFamily: "var(--font-mono)" }}>{s.value}</div>
-                  <div className="text-sm font-semibold text-[#0F0F0F] mt-1" style={{ fontFamily: "var(--font-sans)" }}>{s.label}</div>
-                  <div className="text-xs text-[#787068]" style={{ fontFamily: "var(--font-sans)" }}>{s.sub}</div>
+                { value: `${courseCount}`, label: "Курсов", sub: "на платформе" },
+                { value: `${totalLessons}`, label: "Уроков", sub: "суммарно" },
+                { value: `${enrollmentCount}+`, label: "Записей", sub: "от студентов" },
+                { value: "4.9", label: "Рейтинг", sub: "средняя оценка" },
+              ].map((s, i) => (
+                <div
+                  key={s.label}
+                  className="px-6 py-8 md:px-10"
+                  style={{ borderRight: i < 3 ? "1px solid #1F1C1A" : "none" }}
+                >
+                  <div
+                    className="text-3xl md:text-4xl font-black mb-1"
+                    style={{ fontFamily: "var(--font-mono)", color: "#F0EBE3" }}
+                  >
+                    {s.value}
+                  </div>
+                  <div className="text-sm font-semibold" style={{ fontFamily: "var(--font-sans)", color: "#9A9088" }}>
+                    {s.label}
+                  </div>
+                  <div className="text-xs mt-0.5" style={{ fontFamily: "var(--font-sans)", color: "#3A3530" }}>
+                    {s.sub}
+                  </div>
                 </div>
               ))}
             </div>
@@ -151,25 +244,49 @@ export default async function HomePage() {
         </section>
 
         {/* ─── MARQUEE ─── */}
-        <div className="border-y-2 border-[#0F0F0F] py-3.5 overflow-hidden bg-[#0F0F0F]">
+        <div
+          className="py-4 overflow-hidden"
+          style={{ background: "#0A0807", borderTop: "1px solid #1F1C1A", borderBottom: "1px solid #1F1C1A" }}
+        >
           <div className="flex animate-marquee w-max gap-3">
             {[...TECH_TAGS, ...TECH_TAGS].map((tag, i) => (
-              <span key={i} className={`shrink-0 px-4 py-1.5 text-xs font-bold border-2 ${tagClass(tag.v)}`} style={{ fontFamily: "var(--font-mono)" }}>
-                {tag.label}
+              <span
+                key={i}
+                className="shrink-0 px-4 py-1.5 text-[11px] font-black tracking-widest"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  background: i % 3 === 0 ? "rgba(232,53,29,0.08)" : "transparent",
+                  color: i % 3 === 0 ? "#E8351D" : "#3A3530",
+                  border: `1px solid ${i % 3 === 0 ? "rgba(232,53,29,0.2)" : "#1F1C1A"}`,
+                }}
+              >
+                {tag}
               </span>
             ))}
           </div>
         </div>
 
         {/* ─── FEATURES ─── */}
-        <section className="border-b-2 border-[#0F0F0F] bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section style={{ background: "#0D0B09", borderBottom: "1px solid #1F1C1A" }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: "#1F1C1A" }}>
               {FEATURES.map((f) => (
-                <div key={f.title} className="border-2 border-[#0F0F0F] p-6 hover:shadow-brutal transition-all hover:-translate-y-0.5 bg-white">
-                  <div className="text-3xl mb-4">{f.icon}</div>
-                  <h3 className="font-black text-sm text-[#0F0F0F] mb-2" style={{ fontFamily: "var(--font-display)" }}>{f.title}</h3>
-                  <p className="text-xs text-[#787068] leading-relaxed" style={{ fontFamily: "var(--font-sans)" }}>{f.desc}</p>
+                <div key={f.title} className="feature-card p-8">
+                  <div
+                    className="text-xs font-black mb-4"
+                    style={{ fontFamily: "var(--font-mono)", color: "#E8351D" }}
+                  >
+                    {f.num}
+                  </div>
+                  <h3
+                    className="font-black text-sm mb-3"
+                    style={{ fontFamily: "var(--font-display)", color: "#F0EBE3" }}
+                  >
+                    {f.title}
+                  </h3>
+                  <p className="text-xs leading-relaxed" style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}>
+                    {f.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -177,52 +294,101 @@ export default async function HomePage() {
         </section>
 
         {/* ─── COURSES ─── */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#787068] mb-2" style={{ fontFamily: "var(--font-mono)" }}>Программы</p>
-              <h2 className="text-4xl md:text-5xl font-black text-[#0F0F0F] leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-                ПОПУЛЯРНЫЕ<br />КУРСЫ
-              </h2>
+        <section style={{ background: "#0D0B09" }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <p
+                  className="text-[10px] font-black uppercase tracking-[0.25em] mb-2"
+                  style={{ fontFamily: "var(--font-mono)", color: "#6E675E" }}
+                >
+                  Программы
+                </p>
+                <h2
+                  className="text-4xl md:text-5xl font-black leading-tight"
+                  style={{ fontFamily: "var(--font-display)", color: "#F0EBE3" }}
+                >
+                  ПОПУЛЯРНЫЕ<br />КУРСЫ
+                </h2>
+              </div>
+              <Link
+                href="/courses"
+                className="link-muted hidden md:inline-flex items-center gap-1.5 text-sm font-black"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Все курсы <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-            <Link href="/courses" className="hidden md:inline-flex items-center gap-1.5 text-sm font-black text-[#D4402F] border-b-2 border-[#D4402F] pb-0.5 hover:text-[#0F0F0F] hover:border-[#0F0F0F] transition-colors" style={{ fontFamily: "var(--font-display)" }}>
-              Все курсы <ArrowRight className="w-4 h-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {courses.map((course) => <CourseCard key={course.id} course={course} />)}
+            </div>
+            <Link
+              href="/courses"
+              className="mt-8 flex md:hidden items-center gap-1.5 text-sm font-black"
+              style={{ fontFamily: "var(--font-display)", color: "#E8351D" }}
+            >
+              Все {courseCount} курсов <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course) => <CourseCard key={course.id} course={course} />)}
-          </div>
-          <Link href="/courses" className="mt-6 flex md:hidden items-center gap-1.5 text-sm font-black text-[#D4402F]" style={{ fontFamily: "var(--font-display)" }}>
-            Все {courseCount} курсов <ArrowRight className="w-4 h-4" />
-          </Link>
         </section>
 
         {/* ─── INSTRUCTORS ─── */}
-        <section className="border-y-2 border-[#0F0F0F] bg-[#FDFCE8]">
+        <section style={{ background: "#0A0807", borderTop: "1px solid #1F1C1A", borderBottom: "1px solid #1F1C1A" }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div className="mb-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#787068] mb-2" style={{ fontFamily: "var(--font-mono)" }}>Команда</p>
-              <h2 className="text-4xl font-black text-[#0F0F0F]" style={{ fontFamily: "var(--font-display)" }}>ПРЕПОДАВАТЕЛИ</h2>
+            <div className="mb-12">
+              <p
+                className="text-[10px] font-black uppercase tracking-[0.25em] mb-2"
+                style={{ fontFamily: "var(--font-mono)", color: "#6E675E" }}
+              >
+                Команда
+              </p>
+              <h2
+                className="text-4xl font-black"
+                style={{ fontFamily: "var(--font-display)", color: "#F0EBE3" }}
+              >
+                ПРЕПОДАВАТЕЛИ
+              </h2>
             </div>
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 gap-4">
               {instructors.map((inst) => {
                 const totalStudents = inst.courses.reduce((a, c) => a + c._count.enrollments, 0);
                 return (
-                  <div key={inst.id} className="bg-white border-2 border-[#0F0F0F] p-6 flex gap-5 shadow-brutal">
+                  <div
+                    key={inst.id}
+                    className="flex gap-5 p-6"
+                    style={{ background: "#141210", border: "1px solid #262220" }}
+                  >
                     {inst.image ? (
-                      <Image src={inst.image} alt={inst.name ?? ""} width={80} height={80} unoptimized className="rounded-full border-2 border-[#0F0F0F] shrink-0 object-cover" />
+                      <Image
+                        src={inst.image}
+                        alt={inst.name ?? ""}
+                        width={72} height={72}
+                        unoptimized
+                        className="rounded-full shrink-0 object-cover"
+                        style={{ border: "1px solid #3A3530" }}
+                      />
                     ) : (
-                      <div className="w-20 h-20 rounded-full border-2 border-[#0F0F0F] bg-[#FAFAF7] flex items-center justify-center shrink-0">
-                        <span className="text-2xl font-black" style={{ fontFamily: "var(--font-display)" }}>{(inst.name ?? "?")[0]}</span>
+                      <div
+                        className="rounded-full shrink-0 flex items-center justify-center text-xl font-black"
+                        style={{ width: 72, height: 72, background: "#1F1C1A", color: "#F0EBE3", fontFamily: "var(--font-display)" }}
+                      >
+                        {(inst.name ?? "?")[0]}
                       </div>
                     )}
                     <div>
-                      <h3 className="font-black text-lg text-[#0F0F0F]" style={{ fontFamily: "var(--font-display)" }}>{inst.name}</h3>
-                      <p className="text-xs text-[#787068] mt-0.5 mb-3" style={{ fontFamily: "var(--font-mono)" }}>Senior Developer · Преподаватель</p>
-                      <div className="flex gap-4 text-xs" style={{ fontFamily: "var(--font-mono)" }}>
-                        <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {totalStudents} студентов</span>
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {inst._count.courses} курсов</span>
-                        <span className="flex items-center gap-1"><Star className="w-3 h-3 text-[#D4402F]" /> 4.9</span>
+                      <h3
+                        className="font-black text-lg mb-0.5"
+                        style={{ fontFamily: "var(--font-display)", color: "#F0EBE3" }}
+                      >
+                        {inst.name}
+                      </h3>
+                      <p className="text-xs mb-3" style={{ fontFamily: "var(--font-mono)", color: "#6E675E" }}>
+                        Senior Developer — Преподаватель
+                      </p>
+                      <div className="flex gap-5 text-xs" style={{ fontFamily: "var(--font-mono)", color: "#6E675E" }}>
+                        <span><span style={{ color: "#E8A020" }}>{inst._count.courses}</span> курсов</span>
+                        <span><span style={{ color: "#E8A020" }}>{totalStudents}</span> студентов</span>
+                        <span style={{ color: "#E8A020" }}>★ 4.9</span>
                       </div>
                     </div>
                   </div>
@@ -234,62 +400,105 @@ export default async function HomePage() {
 
         {/* ─── REVIEWS ─── */}
         {reviews.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div className="mb-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#787068] mb-2" style={{ fontFamily: "var(--font-mono)" }}>Отзывы</p>
-              <h2 className="text-4xl font-black text-[#0F0F0F]" style={{ fontFamily: "var(--font-display)" }}>ЧТО ГОВОРЯТ<br />СТУДЕНТЫ</h2>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-5">
-              {reviews.map((r) => (
-                <div key={r.id} className="bg-white border-2 border-[#0F0F0F] p-6 shadow-brutal">
-                  <div className="flex gap-0.5 mb-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`w-4 h-4 ${i < r.rating ? "text-[#D4402F] fill-[#D4402F]" : "text-[#E0DDD8]"}`} />
-                    ))}
-                  </div>
-                  <p className="text-sm text-[#0F0F0F] leading-relaxed mb-5" style={{ fontFamily: "var(--font-sans)" }}>«{r.text}»</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-[#E0DDD8]">
-                    {r.user.image ? (
-                      <Image src={r.user.image} alt={r.user.name ?? ""} width={36} height={36} unoptimized className="rounded-full border-2 border-[#0F0F0F] object-cover" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full border-2 border-[#0F0F0F] bg-[#FAFAF7] flex items-center justify-center text-xs font-black" style={{ fontFamily: "var(--font-display)" }}>
-                        {(r.user.name ?? "?")[0]}
+          <section style={{ background: "#0D0B09" }}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+              <div className="mb-12">
+                <p
+                  className="text-[10px] font-black uppercase tracking-[0.25em] mb-2"
+                  style={{ fontFamily: "var(--font-mono)", color: "#6E675E" }}
+                >
+                  Отзывы
+                </p>
+                <h2
+                  className="text-4xl font-black"
+                  style={{ fontFamily: "var(--font-display)", color: "#F0EBE3" }}
+                >
+                  ЧТО ГОВОРЯТ<br />СТУДЕНТЫ
+                </h2>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {reviews.map((r) => (
+                  <div key={r.id} className="p-7" style={{ background: "#141210", border: "1px solid #262220" }}>
+                    <div className="flex gap-0.5 mb-5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span key={i} style={{ color: i < r.rating ? "#E8A020" : "#2A2218", fontSize: "14px" }}>★</span>
+                      ))}
+                    </div>
+                    <p
+                      className="text-sm leading-relaxed mb-6"
+                      style={{ fontFamily: "var(--font-sans)", color: "#9A9088" }}
+                    >
+                      &laquo;{r.text}&raquo;
+                    </p>
+                    <div className="flex items-center gap-3 pt-5" style={{ borderTop: "1px solid #1F1C1A" }}>
+                      {r.user.image ? (
+                        <Image
+                          src={r.user.image} alt={r.user.name ?? ""}
+                          width={36} height={36} unoptimized
+                          className="rounded-full object-cover"
+                          style={{ border: "1px solid #3A3530" }}
+                        />
+                      ) : (
+                        <div
+                          className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-black"
+                          style={{ background: "#1F1C1A", color: "#F0EBE3", fontFamily: "var(--font-display)" }}
+                        >
+                          {(r.user.name ?? "?")[0]}
+                        </div>
+                      )}
+                      <div>
+                        <div className="text-xs font-semibold" style={{ fontFamily: "var(--font-sans)", color: "#F0EBE3" }}>
+                          {r.user.name}
+                        </div>
+                        <div className="text-[10px]" style={{ fontFamily: "var(--font-mono)", color: "#3A3530" }}>
+                          {r.course.title}
+                        </div>
                       </div>
-                    )}
-                    <div>
-                      <div className="text-xs font-semibold text-[#0F0F0F]" style={{ fontFamily: "var(--font-sans)" }}>{r.user.name}</div>
-                      <div className="text-[10px] text-[#787068]" style={{ fontFamily: "var(--font-mono)" }}>Курс: {r.course.title}</div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </section>
         )}
 
         {/* ─── CTA ─── */}
-        <section className="border-t-2 border-[#0F0F0F] bg-[#0F0F0F] text-[#FAFAF7]">
+        <section style={{ background: "#E8351D" }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
-              <h2 className="text-3xl md:text-4xl font-black leading-tight" style={{ fontFamily: "var(--font-display)" }}>ГОТОВ НАЧАТЬ?</h2>
-              <p className="text-[#787068] mt-3 max-w-sm" style={{ fontFamily: "var(--font-sans)" }}>
+              <h2
+                className="text-3xl md:text-4xl font-black leading-tight"
+                style={{ fontFamily: "var(--font-display)", color: "#F0EBE3" }}
+              >
+                ГОТОВ НАЧАТЬ?
+              </h2>
+              <p className="mt-3 max-w-sm" style={{ fontFamily: "var(--font-sans)", color: "rgba(240,235,227,0.65)" }}>
                 Зарегистрируйся и получи доступ к 3 бесплатным курсам прямо сейчас.
               </p>
-              <div className="flex flex-wrap gap-3 mt-5">
+              <div className="flex flex-wrap gap-4 mt-5">
                 {["JavaScript", "Python", "Git"].map((tag) => (
-                  <span key={tag} className="flex items-center gap-1.5 text-xs text-[#787068]" style={{ fontFamily: "var(--font-mono)" }}>
-                    <CheckCircle className="w-3.5 h-3.5 text-[#1A9E6E]" /> {tag}
+                  <span
+                    key={tag}
+                    className="flex items-center gap-1.5 text-xs"
+                    style={{ fontFamily: "var(--font-mono)", color: "rgba(240,235,227,0.6)" }}
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" style={{ color: "rgba(240,235,227,0.8)" }} /> {tag}
                   </span>
                 ))}
               </div>
             </div>
-            <Link href="/login" className="shrink-0 inline-flex items-center gap-2 px-8 py-4 bg-[#D4402F] text-[#FAFAF7] font-black text-base border-2 border-[#D4402F] shadow-[4px_4px_0_#FAFAF7] hover:shadow-[2px_2px_0_#FAFAF7] hover:translate-x-0.5 hover:translate-y-0.5 transition-all" style={{ fontFamily: "var(--font-display)" }}>
+            <Link
+              href="/login"
+              className="shrink-0 inline-flex items-center gap-2 px-10 py-4 text-base font-black transition-opacity hover:opacity-90"
+              style={{ fontFamily: "var(--font-display)", background: "#0D0B09", color: "#F0EBE3" }}
+            >
               Начать бесплатно <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
         </section>
+
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

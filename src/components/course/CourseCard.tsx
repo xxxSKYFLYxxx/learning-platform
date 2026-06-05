@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { BookOpen } from "lucide-react";
@@ -8,10 +10,10 @@ interface Props {
   course: CourseCardType;
 }
 
-const LEVEL_BG: Record<string, string> = {
-  BEGINNER:     "#B8E8C8",
-  INTERMEDIATE: "#FFE08A",
-  ADVANCED:     "#FFB3AA",
+const LEVEL_ACCENT: Record<string, string> = {
+  BEGINNER:     "#1EA876",
+  INTERMEDIATE: "#E8A020",
+  ADVANCED:     "#E8351D",
 };
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -21,82 +23,91 @@ const LEVEL_LABELS: Record<string, string> = {
 };
 
 export function CourseCard({ course }: Props) {
-  const levelBg = LEVEL_BG[course.level] ?? "#E0DDD8";
+  const accent = LEVEL_ACCENT[course.level] ?? "#6E675E";
 
   return (
     <Link
       href={`/courses/${course.slug}`}
-      className="group flex flex-col bg-white border-2 border-[#0F0F0F] shadow-brutal hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all duration-150"
+      className="group flex flex-col course-card"
     >
-      {/* Level colour strip */}
-      <div
-        className="h-1.5 border-b-2 border-[#0F0F0F]"
-        style={{ backgroundColor: levelBg }}
-      />
+      {/* Level strip */}
+      <div className="h-0.5" style={{ background: accent, opacity: 0.6 }} />
 
       {/* Thumbnail */}
-      <div className="relative aspect-video border-b-2 border-[#0F0F0F]" style={{ backgroundColor: levelBg + "55" }}>
+      <div className="relative aspect-video overflow-hidden" style={{ background: "#0D0B09" }}>
         {course.imageUrl ? (
-          <Image src={course.imageUrl} alt={course.title} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-300" />
+          <Image
+            src={course.imageUrl}
+            alt={course.title}
+            fill
+            unoptimized
+            className="object-cover opacity-60 transition-all duration-500 group-hover:opacity-85 group-hover:scale-105"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <BookOpen className="w-8 h-8 text-[#0F0F0F]/20" />
+            <BookOpen className="w-8 h-8 opacity-10" style={{ color: "#F0EBE3" }} />
           </div>
         )}
+
+        {/* Level badge */}
+        <div className="absolute top-3 left-3">
+          <span
+            className="text-[9px] font-black uppercase tracking-widest px-2 py-1"
+            style={{
+              fontFamily: "var(--font-mono)",
+              background: "#0D0B09",
+              color: accent,
+              border: `1px solid ${accent}66`,
+            }}
+          >
+            {LEVEL_LABELS[course.level] ?? course.level}
+          </span>
+        </div>
       </div>
 
       {/* Body */}
       <div className="flex flex-col flex-1 p-5 gap-3">
-        {/* Level tag */}
-        <span
-          className="self-start text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border border-[#0F0F0F]"
-          style={{ backgroundColor: levelBg, fontFamily: "var(--font-mono)" }}
-        >
-          {LEVEL_LABELS[course.level] ?? course.level}
-        </span>
-
         <h3
-          className="font-black text-base leading-snug text-[#0F0F0F] group-hover:text-[#D4402F] transition-colors"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="font-black text-base leading-snug transition-colors duration-200 group-hover:text-[#E8351D]"
+          style={{ fontFamily: "var(--font-display)", color: "#F0EBE3" }}
         >
           {course.title}
         </h3>
 
         {course.description && (
           <p
-            className="text-sm text-[#787068] line-clamp-2 leading-relaxed"
-            style={{ fontFamily: "var(--font-sans)" }}
+            className="text-sm leading-relaxed line-clamp-2"
+            style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}
           >
             {course.description}
           </p>
         )}
 
-        <div className="mt-auto pt-3 border-t-2 border-[#0F0F0F]/10 flex items-center justify-between">
-          <div
-            className="flex items-center gap-3 text-xs text-[#787068]"
-            style={{ fontFamily: "var(--font-mono)" }}
-          >
-            <span>{course._count.enrollments}⟳</span>
+        {/* Footer */}
+        <div className="mt-auto pt-4 flex items-center justify-between" style={{ borderTop: "1px solid #262220" }}>
+          <div className="flex items-center gap-3 text-xs" style={{ fontFamily: "var(--font-mono)", color: "#6E675E" }}>
+            <span>{course._count.enrollments} уч.</span>
             {course._count.reviews > 0 && course.avgRating && (
-              <span>★{course.avgRating.toFixed(1)}</span>
+              <span style={{ color: "#E8A020" }}>★ {course.avgRating.toFixed(1)}</span>
             )}
           </div>
           <span
-            className="font-black text-base text-[#0F0F0F]"
-            style={{ fontFamily: "var(--font-mono)" }}
+            className="font-black text-base"
+            style={{ fontFamily: "var(--font-mono)", color: course.isFree ? "#1EA876" : "#F0EBE3" }}
           >
             {course.isFree ? "FREE" : formatPrice(Number(course.price))}
           </span>
         </div>
 
+        {/* Instructor */}
         <div className="flex items-center gap-2">
           <div
-            className="w-6 h-6 rounded-full border-2 border-[#0F0F0F] flex items-center justify-center text-[10px] font-black bg-[#FAFAF7]"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shrink-0"
+            style={{ background: "#262220", color: "#9A9088", fontFamily: "var(--font-display)" }}
           >
             {(course.instructor.name ?? "?")[0].toUpperCase()}
           </div>
-          <span className="text-xs text-[#787068]" style={{ fontFamily: "var(--font-sans)" }}>
+          <span className="text-xs truncate" style={{ fontFamily: "var(--font-sans)", color: "#6E675E" }}>
             {course.instructor.name}
           </span>
         </div>
