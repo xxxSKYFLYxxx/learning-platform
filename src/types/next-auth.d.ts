@@ -12,3 +12,10 @@ declare module "@auth/core/types" {
     role?: string;
   }
 }
+
+declare module "@auth/core/jwt" {
+  interface JWT {
+    id?: string;
+    role?: string;
+  }
+}

@@ -1,33 +1,53 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import Resend from "next-auth/providers/resend";
-import VK from "next-auth/providers/vk";
-import Yandex from "next-auth/providers/yandex";
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  session: { strategy: "jwt" },
   providers: [
-    // ВКонтакте OAuth
-    VK({
-      clientId:     process.env.VK_CLIENT_ID!,
-      clientSecret: process.env.VK_CLIENT_SECRET!,
-    }),
-    // Яндекс ID
-    Yandex({
-      clientId:     process.env.YANDEX_CLIENT_ID!,
-      clientSecret: process.env.YANDEX_CLIENT_SECRET!,
-    }),
-    // Email magic link через Resend (резервный вариант)
-    Resend({
-      apiKey: process.env.RESEND_API_KEY!,
-      from:   process.env.EMAIL_FROM ?? "noreply@kurs.dev",
+    Credentials({
+      credentials: {
+        email:    { label: "Email", type: "email" },
+        password: { label: "Пароль", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = (credentials?.email as string | undefined)?.trim().toLowerCase();
+        const password = credentials?.password as string | undefined;
+        if (!email || !password) return null;
+
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user || !user.passwordHash) return null;
+
+        const valid = await bcrypt.compare(password, user.passwordHash);
+        if (!valid) return null;
+
+        return {
+          id:    user.id,
+          email: user.email,
+          name:  user.name,
+          image: user.image,
+          role:  user.role,
+        };
+      },
     }),
   ],
   callbacks: {
-    session({ session, user }) {
-      session.user.id   = user.id;
-      session.user.role = (user as { role?: string }).role ?? "STUDENT";
+    jwt({ token, user }) {
+      // На первом входе user заполнен — переносим id и роль в токен
+      if (user) {
+        token.id   = user.id;
+        token.role = (user as { role?: string }).role ?? "STUDENT";
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user) {
+        session.user.id   = (token.id as string) ?? token.sub!;
+        session.user.role = (token.role as string) ?? "STUDENT";
+      }
       return session;
     },
   },

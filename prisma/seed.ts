@@ -1,10 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import bcrypt from "bcryptjs";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
+
+// Единый пароль для всех тестовых аккаунтов: "password123"
+const DEMO_HASH = bcrypt.hashSync("password123", 10);
 
 // Pexels CDN — verified free stock photos
 const PX = (id: number) =>
@@ -36,14 +40,14 @@ async function main() {
   // ── INSTRUCTORS ─────────────────────────────────────────────
   const ivan = await prisma.user.upsert({
     where: { email: "ivan@kurs.dev" },
-    update: { role: "INSTRUCTOR", name: "Иван Петров", image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" },
-    create: { email: "ivan@kurs.dev", name: "Иван Петров", role: "INSTRUCTOR", image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" },
+    update: { role: "INSTRUCTOR", name: "Иван Петров", passwordHash: DEMO_HASH, image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" },
+    create: { email: "ivan@kurs.dev", name: "Иван Петров", role: "INSTRUCTOR", passwordHash: DEMO_HASH, image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" },
   });
 
   const maria = await prisma.user.upsert({
     where: { email: "maria@kurs.dev" },
-    update: { role: "INSTRUCTOR", name: "Мария Соколова", image: "https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" },
-    create: { email: "maria@kurs.dev", name: "Мария Соколова", role: "INSTRUCTOR", image: "https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" },
+    update: { role: "INSTRUCTOR", name: "Мария Соколова", passwordHash: DEMO_HASH, image: "https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" },
+    create: { email: "maria@kurs.dev", name: "Мария Соколова", role: "INSTRUCTOR", passwordHash: DEMO_HASH, image: "https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" },
   });
 
   // ── COURSES ─────────────────────────────────────────────────
@@ -330,9 +334,10 @@ async function main() {
   ];
 
   const createdStudents = await Promise.all(
-    students.map((s) =>
-      prisma.user.upsert({ where: { email: s.email }, update: s, create: s })
-    )
+    students.map((s) => {
+      const data = { ...s, passwordHash: DEMO_HASH };
+      return prisma.user.upsert({ where: { email: s.email }, update: data, create: data });
+    })
   );
 
   // ── ENROLLMENTS ─────────────────────────────────────────────

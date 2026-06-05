@@ -1,20 +1,18 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { registerUser } from "@/app/(auth)/actions";
 
 const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--c-t2)", marginBottom: 6, fontFamily: "var(--font-mono)" };
 const fieldStyle: React.CSSProperties = { width: "100%", padding: "12px 16px", fontSize: 14, fontFamily: "var(--font-sans)", boxSizing: "border-box" };
 
-function LoginForm() {
+export default function RegisterPage() {
   const router = useRouter();
-  const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") || "/dashboard";
-
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +21,20 @@ function LoginForm() {
     setError(null);
     setLoading(true);
 
+    const fd = new FormData();
+    fd.set("name", form.name);
+    fd.set("email", form.email);
+    fd.set("password", form.password);
+
+    const result = await registerUser(fd);
+
+    if (!result.ok) {
+      setError(result.error);
+      setLoading(false);
+      return;
+    }
+
+    // Автоматический вход после регистрации
     const res = await signIn("credentials", {
       email: form.email,
       password: form.password,
@@ -32,10 +44,11 @@ function LoginForm() {
     setLoading(false);
 
     if (res?.error) {
-      setError("Неверный email или пароль");
+      // Аккаунт создан, но автологин не удался — отправляем на вход
+      router.push("/login");
       return;
     }
-    router.push(callbackUrl);
+    router.push("/dashboard");
     router.refresh();
   }
 
@@ -51,10 +64,10 @@ function LoginForm() {
             <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 20, padding: "4px 9px", border: "1px solid var(--c-border-hi)", borderLeft: "none", color: "var(--c-t1)" }}>УРС</span>
           </Link>
           <h1 style={{ fontSize: 26, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>
-            Вход в аккаунт
+            Регистрация
           </h1>
           <p style={{ color: "var(--c-t3)", fontSize: 14, marginTop: 8, fontFamily: "var(--font-sans)" }}>
-            Введите email и пароль
+            Создайте аккаунт за минуту
           </p>
         </div>
 
@@ -65,6 +78,15 @@ function LoginForm() {
               {error}
             </div>
           )}
+
+          <div>
+            <label style={labelStyle}>Имя</label>
+            <input
+              type="text" name="name" required autoComplete="name" minLength={2}
+              value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="input-dark" style={fieldStyle} placeholder="Иван Петров"
+            />
+          </div>
 
           <div>
             <label style={labelStyle}>Email</label>
@@ -78,38 +100,30 @@ function LoginForm() {
           <div>
             <label style={labelStyle}>Пароль</label>
             <input
-              type="password" name="password" required autoComplete="current-password"
+              type="password" name="password" required autoComplete="new-password" minLength={6}
               value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="input-dark" style={fieldStyle} placeholder="••••••••"
+              className="input-dark" style={fieldStyle} placeholder="Минимум 6 символов"
             />
           </div>
 
           <button type="submit" disabled={loading} className="btn-red" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 16px", fontSize: 14, fontWeight: 900, border: "none", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1, fontFamily: "var(--font-display)" }}>
             {loading && <Loader2 size={16} className="animate-spin" />}
-            Войти
+            Создать аккаунт
           </button>
         </form>
 
         <p style={{ textAlign: "center", fontSize: 14, color: "var(--c-t3)", marginTop: 20, fontFamily: "var(--font-sans)" }}>
-          Нет аккаунта?{" "}
-          <Link href="/register" style={{ color: "var(--c-red)", textDecoration: "none", fontWeight: 700 }}>Зарегистрироваться</Link>
+          Уже есть аккаунт?{" "}
+          <Link href="/login" style={{ color: "var(--c-red)", textDecoration: "none", fontWeight: 700 }}>Войти</Link>
         </p>
 
         <p style={{ textAlign: "center", fontSize: 12, color: "var(--c-t4)", marginTop: 16, lineHeight: 1.6, fontFamily: "var(--font-sans)" }}>
-          Продолжая, вы соглашаетесь с{" "}
+          Регистрируясь, вы соглашаетесь с{" "}
           <Link href="/privacy" style={{ color: "var(--c-t3)", textDecoration: "underline" }}>политикой конфиденциальности</Link>{" "}
           и{" "}
           <Link href="/offer" style={{ color: "var(--c-t3)", textDecoration: "underline" }}>офертой</Link>
         </p>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
   );
 }
