@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, CheckCircle, Star, BookOpen, Award, Clock, Users, Zap, Shield, TrendingUp, Code2, BarChart3, Globe } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Award, Clock, Users, Zap, Shield, Code2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
@@ -209,7 +209,7 @@ export default async function HomePage() {
                   </div>
                   {/* Terminal body */}
                   <div style={{ padding: "20px 20px", fontFamily: "var(--font-mono)", fontSize: 13, lineHeight: 1.8 }}>
-                    <div style={{ color: T.t4, fontSize: 11, marginBottom: 8, letterSpacing: "0.08em" }}>// день 1 после курса</div>
+                    <div style={{ color: T.t4, fontSize: 11, marginBottom: 8, letterSpacing: "0.08em" }}>{"// день 1 после курса"}</div>
                     <div style={{ color: T.t2 }}><span style={{ color: T.red }}>const </span><span style={{ color: T.t2 }}>dev </span>= {"{"}</div>
                     <div style={{ paddingLeft: 20, color: T.t3 }}>
                       <div><span style={{ color: T.t1 }}>name</span>: <span style={{ color: T.amb }}>&quot;Алексей&quot;</span>,</div>

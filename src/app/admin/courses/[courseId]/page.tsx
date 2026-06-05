@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Trash2, Plus, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/utils";
 import {
   updateCourse,
   togglePublish,

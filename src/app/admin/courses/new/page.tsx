@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createCourse } from "@/app/admin/actions";
 
 export const metadata = { title: "Admin — Новый курс" };
@@ -89,13 +90,13 @@ export default function NewCoursePage() {
           >
             Создать курс →
           </button>
-          <a
+          <Link
             href="/admin/courses"
             className="px-6 py-3 text-sm text-[#787068] border-2 border-[#E0DDD8] hover:border-[#0F0F0F] transition-colors"
             style={{ fontFamily: "var(--font-sans)" }}
           >
             Отмена
-          </a>
+          </Link>
         </div>
       </form>
     </div>

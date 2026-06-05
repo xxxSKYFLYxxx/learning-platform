@@ -25,13 +25,6 @@ export default async function InstructorPage() {
   });
 
   const totalStudents = courses.reduce((a, c) => a + c._count.enrollments, 0);
-  const totalRevenue = await prisma.enrollment.aggregate({
-    where: {
-      course: { instructorId: session.user.id! },
-      status: { in: ["ACTIVE", "COMPLETED"] },
-    },
-    _sum: { course: false } as never,
-  });
 
   // Revenue from courses prices
   const revenue = await prisma.$queryRaw<{ total: number }[]>`

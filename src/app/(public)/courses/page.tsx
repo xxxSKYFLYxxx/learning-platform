@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CourseCard } from "@/components/course/CourseCard";
@@ -167,9 +168,9 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
               {params.q && <span style={{ color: "var(--c-t3)" }}> по запросу «{params.q}»</span>}
             </p>
             {isFiltered && (
-              <a href="/courses" style={{ fontSize: 12, color: "var(--c-red)", textDecoration: "none", fontFamily: "var(--font-display)", fontWeight: 700 }}>
+              <Link href="/courses" style={{ fontSize: 12, color: "var(--c-red)", textDecoration: "none", fontFamily: "var(--font-display)", fontWeight: 700 }}>
                 Сбросить фильтры ×
-              </a>
+              </Link>
             )}
           </div>
 
@@ -184,9 +185,9 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
               <p style={{ fontSize: 15, color: "var(--c-t3)", fontFamily: "var(--font-sans)", marginBottom: 20 }}>
                 По вашему запросу ничего не найдено
               </p>
-              <a href="/courses" style={{ fontSize: 13, fontWeight: 900, color: "var(--c-red)", textDecoration: "none", fontFamily: "var(--font-display)" }}>
+              <Link href="/courses" style={{ fontSize: 13, fontWeight: 900, color: "var(--c-red)", textDecoration: "none", fontFamily: "var(--font-display)" }}>
                 Сбросить фильтры →
-              </a>
+              </Link>
             </div>
           )}
         </div>

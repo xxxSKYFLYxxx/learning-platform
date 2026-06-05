@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { BookOpen, Clock, Users } from "lucide-react";
+import { BookOpen, Users } from "lucide-react";
 import type { CourseCard as CourseCardType } from "@/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -13,11 +13,6 @@ const LEVEL_COLOR: Record<string, string> = {
   INTERMEDIATE: "var(--c-amber)",
   ADVANCED:     "var(--c-red)",
 };
-const LEVEL_BG: Record<string, string> = {
-  BEGINNER:     "rgba(31,158,110,0.12)",
-  INTERMEDIATE: "rgba(200,138,32,0.12)",
-  ADVANCED:     "rgba(208,57,42,0.12)",
-};
 const LEVEL_LABELS: Record<string, string> = {
   BEGINNER:     "Начальный",
   INTERMEDIATE: "Средний",
@@ -26,7 +21,6 @@ const LEVEL_LABELS: Record<string, string> = {
 
 export function CourseCard({ course }: Props) {
   const accent = LEVEL_COLOR[course.level] ?? "var(--c-t3)";
-  const accentBg = LEVEL_BG[course.level] ?? "transparent";
 
   return (
     <Link href={`/courses/${course.slug}`} className="course-card" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>

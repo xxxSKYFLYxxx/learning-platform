@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
-import { togglePublish, deleteCourse } from "@/app/admin/actions";
+import { togglePublish } from "@/app/admin/actions";
 import { Eye, EyeOff, Pencil, Plus } from "lucide-react";
 
 export const metadata = { title: "Admin — Курсы" };
