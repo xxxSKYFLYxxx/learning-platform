@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, BookOpen, Users, ShoppingCart, LogOut, ChevronRight } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { cn } from "@/lib/utils";
-import { Logo } from "@/components/layout/Logo";
 
 const NAV = [
   { href: "/admin",             icon: LayoutDashboard, label: "Дашборд" },
@@ -18,48 +16,51 @@ export function AdminNav() {
   const path = usePathname();
 
   return (
-    <aside className="w-52 shrink-0 bg-[#0F0F0F] flex flex-col min-h-screen sticky top-0 h-screen">
+    <aside style={{ width: 208, flexShrink: 0, background: "var(--c-s1)", borderRight: "1px solid var(--c-border)", display: "flex", flexDirection: "column", minHeight: "100vh", position: "sticky", top: 0, height: "100vh" }}>
       {/* Brand */}
-      <div className="px-5 py-4 border-b-2 border-white/10">
-        <Logo variant="light" size="sm" />
-        <p className="text-[#555] text-[10px] mt-2 tracking-widest" style={{ fontFamily: "var(--font-mono)" }}>ADMIN</p>
+      <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--c-border)" }}>
+        <Link href="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 14, padding: "3px 7px", background: "var(--c-red)", color: "var(--c-t1)" }}>К</span>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 14, padding: "3px 6px", border: "1px solid var(--c-border-hi)", borderLeft: "none", color: "var(--c-t1)" }}>УРС</span>
+        </Link>
+        <p style={{ color: "var(--c-t4)", fontSize: 10, marginTop: 8, letterSpacing: "0.18em", fontFamily: "var(--font-mono)" }}>ADMIN</p>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
+      <nav style={{ flex: 1, padding: "16px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
         {NAV.map(({ href, icon: Icon, label }) => {
           const active = path === href || (href !== "/admin" && path.startsWith(href));
           return (
             <Link
               key={href}
               href={href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 text-sm transition-colors",
-                active
-                  ? "bg-[#D4402F] text-[#FAFAF7] font-semibold"
-                  : "text-[#666] hover:text-[#FAFAF7] hover:bg-white/5"
-              )}
-              style={{ fontFamily: "var(--font-sans)" }}
+              style={{
+                display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", fontSize: 14, textDecoration: "none", fontFamily: "var(--font-sans)",
+                transition: "all 0.15s",
+                ...(active
+                  ? { background: "var(--c-red)", color: "var(--c-t1)", fontWeight: 600 }
+                  : { color: "var(--c-t3)" }),
+              }}
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon size={16} style={{ flexShrink: 0 }} />
               {label}
-              {active && <ChevronRight className="w-3 h-3 ml-auto opacity-60" />}
+              {active && <ChevronRight size={12} style={{ marginLeft: "auto", opacity: 0.6 }} />}
             </Link>
           );
         })}
       </nav>
 
       {/* Logout */}
-      <div className="px-3 py-4 border-t-2 border-white/10">
-        <Link href="/" className="flex items-center gap-3 px-3 py-2 text-xs text-[#555] hover:text-[#FAFAF7] transition-colors mb-1" style={{ fontFamily: "var(--font-mono)" }}>
+      <div style={{ padding: "16px 12px", borderTop: "1px solid var(--c-border)" }}>
+        <Link href="/" className="link-muted" style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", fontSize: 12, textDecoration: "none", marginBottom: 4, fontFamily: "var(--font-mono)" }}>
           ← на сайт
         </Link>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="flex items-center gap-3 px-3 py-2 w-full text-sm text-[#666] hover:text-[#D4402F] transition-colors"
-          style={{ fontFamily: "var(--font-sans)" }}
+          className="link-muted"
+          style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", width: "100%", fontSize: 14, background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut size={16} />
           Выйти
         </button>
       </div>

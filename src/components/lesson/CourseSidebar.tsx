@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { CheckCircle, PlayCircle, Lock, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 interface Lesson {
@@ -43,31 +42,29 @@ export function CourseSidebar({ courseSlug, modules, activeLessonId, enrolled }:
   });
 
   return (
-    <aside className="flex flex-col h-full overflow-y-auto bg-white border-r border-gray-100">
-      <div className="flex flex-col divide-y divide-gray-50">
+    <aside style={{ display: "flex", flexDirection: "column", height: "100%", overflowY: "auto", background: "var(--c-s1)" }}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {modules.map((mod) => {
           const completedCount = mod.lessons.filter((l) => l.completed).length;
           const isOpen = open[mod.id];
 
           return (
-            <div key={mod.id}>
+            <div key={mod.id} style={{ borderBottom: "1px solid var(--c-border)" }}>
               <button
                 onClick={() => setOpen((prev) => ({ ...prev, [mod.id]: !prev[mod.id] }))}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-surface transition-colors text-left"
+                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", textAlign: "left", background: "transparent", border: "none", cursor: "pointer" }}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text truncate">{mod.title}</p>
-                  <p className="text-xs text-muted mt-0.5">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--c-t1)", fontFamily: "var(--font-sans)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{mod.title}</p>
+                  <p style={{ fontSize: 11, color: "var(--c-t3)", marginTop: 2, fontFamily: "var(--font-mono)" }}>
                     {completedCount}/{mod.lessons.length} пройдено
                   </p>
                 </div>
-                <ChevronDown
-                  className={cn("w-4 h-4 text-muted shrink-0 ml-2 transition-transform", isOpen && "rotate-180")}
-                />
+                <ChevronDown size={16} style={{ color: "var(--c-t3)", flexShrink: 0, marginLeft: 8, transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "none" }} />
               </button>
 
               {isOpen && (
-                <div className="flex flex-col">
+                <div style={{ display: "flex", flexDirection: "column", paddingBottom: 6 }}>
                   {mod.lessons.map((lesson) => {
                     const isActive = lesson.id === activeLessonId;
                     const accessible = enrolled || lesson.isFree;
@@ -76,32 +73,29 @@ export function CourseSidebar({ courseSlug, modules, activeLessonId, enrolled }:
                       <Link
                         key={lesson.id}
                         href={`/learn/${courseSlug}/${lesson.id}`}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors",
-                          isActive
-                            ? "bg-primary/5 text-primary border-r-2 border-primary"
-                            : "text-muted hover:bg-surface hover:text-text"
-                        )}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", fontSize: 13, textDecoration: "none", fontFamily: "var(--font-sans)",
+                          background: isActive ? "var(--c-red-lo)" : "transparent",
+                          color: isActive ? "var(--c-t1)" : "var(--c-t3)",
+                          borderRight: isActive ? "2px solid var(--c-red)" : "2px solid transparent",
+                        }}
                       >
-                        <span className="shrink-0">
+                        <span style={{ flexShrink: 0 }}>
                           {lesson.completed ? (
-                            <CheckCircle className="w-4 h-4 text-success" />
+                            <CheckCircle size={16} style={{ color: "var(--c-green)" }} />
                           ) : (
-                            <PlayCircle className={cn("w-4 h-4", isActive ? "text-primary" : "text-gray-300")} />
+                            <PlayCircle size={16} style={{ color: isActive ? "var(--c-red)" : "var(--c-border-hi)" }} />
                           )}
                         </span>
-                        <span className="flex-1 line-clamp-2 leading-snug">{lesson.title}</span>
+                        <span style={{ flex: 1, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{lesson.title}</span>
                         {lesson.duration && (
-                          <span className="text-xs text-muted shrink-0">{formatSec(lesson.duration)}</span>
+                          <span style={{ fontSize: 11, color: "var(--c-t4)", flexShrink: 0, fontFamily: "var(--font-mono)" }}>{formatSec(lesson.duration)}</span>
                         )}
                       </Link>
                     ) : (
-                      <div
-                        key={lesson.id}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 cursor-not-allowed"
-                      >
-                        <Lock className="w-4 h-4 shrink-0" />
-                        <span className="flex-1 line-clamp-2 leading-snug">{lesson.title}</span>
+                      <div key={lesson.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", fontSize: 13, color: "var(--c-t4)", cursor: "not-allowed", fontFamily: "var(--font-sans)" }}>
+                        <Lock size={16} style={{ flexShrink: 0 }} />
+                        <span style={{ flex: 1, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{lesson.title}</span>
                       </div>
                     );
                   })}

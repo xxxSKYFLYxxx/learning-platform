@@ -50,28 +50,28 @@ const SECTIONS = [
 
 export default function OfferPage() {
   return (
-    <>
+    <div className="grain" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
       <Header />
-      <main className="flex-1">
-        <section className="border-b-2 border-[#0F0F0F] bg-[#FDFCE8]">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#787068] mb-3" style={{ fontFamily: "var(--font-mono)" }}>
+      <main>
+        <section style={{ borderBottom: "1px solid var(--c-border)", background: "var(--c-s1)" }}>
+          <div style={{ maxWidth: 896, margin: "0 auto", padding: "72px 24px" }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 14 }}>
               Документы
             </p>
-            <h1 className="text-4xl md:text-5xl font-black text-[#0F0F0F] leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-              ПУБЛИЧНАЯ<br />ОФЕРТА
+            <h1 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", lineHeight: 1.1 }}>
+              Публичная<br />оферта
             </h1>
           </div>
         </section>
 
-        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="flex flex-col gap-8">
+        <section style={{ maxWidth: 896, margin: "0 auto", padding: "64px 24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
             {SECTIONS.map((s) => (
-              <div key={s.title} className="border-l-4 border-[#0F0F0F] pl-6">
-                <h2 className="text-base font-black text-[#0F0F0F] mb-3" style={{ fontFamily: "var(--font-display)" }}>
+              <div key={s.title} style={{ borderLeft: "3px solid var(--c-red)", paddingLeft: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 900, color: "var(--c-t1)", marginBottom: 12, fontFamily: "var(--font-display)" }}>
                   {s.title}
                 </h2>
-                <div className="text-sm text-[#787068] leading-relaxed whitespace-pre-line" style={{ fontFamily: "var(--font-sans)" }}>
+                <div style={{ fontSize: 14, color: "var(--c-t2)", lineHeight: 1.7, whiteSpace: "pre-line", fontFamily: "var(--font-sans)" }}>
                   {s.body}
                 </div>
               </div>
@@ -80,6 +80,6 @@ export default function OfferPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

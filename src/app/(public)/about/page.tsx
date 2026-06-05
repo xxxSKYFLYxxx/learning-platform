@@ -53,58 +53,59 @@ export default async function AboutPage() {
   const { courseCount, enrollmentCount, instructors } = await getAboutData();
 
   return (
-    <>
+    <div className="grain" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
       <Header />
-      <main className="flex-1">
+      <main>
         {/* Hero */}
-        <section className="border-b-2 border-[#0F0F0F] bg-[#FDFCE8]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#787068] mb-3" style={{ fontFamily: "var(--font-mono)" }}>
+        <section style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--c-border)" }}>
+          <div aria-hidden style={{ position: "absolute", top: "-30%", right: "-5%", width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle,var(--c-red-mid) 0%,transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px", position: "relative" }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 14 }}>
               О платформе
             </p>
-            <h1 className="text-5xl md:text-6xl font-black text-[#0F0F0F] leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
-              МЫ УЧИМ<br />ПРОГРАММИРОВАНИЮ
+            <h1 style={{ fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", lineHeight: 1.05, marginBottom: 24 }}>
+              Мы учим<br /><span style={{ color: "var(--c-red)" }}>программированию</span>
             </h1>
-            <p className="text-lg text-[#787068] max-w-xl leading-relaxed" style={{ fontFamily: "var(--font-sans)" }}>
+            <p style={{ fontSize: 18, color: "var(--c-t2)", fontFamily: "var(--font-sans)", maxWidth: 600, lineHeight: 1.65 }}>
               КУРС — платформа, которую построили практикующие разработчики для тех, кто хочет войти в IT без лишней воды и переплаты.
             </p>
           </div>
         </section>
 
         {/* Stats */}
-        <section className="border-b-2 border-[#0F0F0F] bg-white">
-          <div className="max-w-7xl mx-auto grid grid-cols-3 divide-x-2 divide-[#0F0F0F]">
+        <section style={{ borderBottom: "1px solid var(--c-border)", background: "var(--c-s1)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
             {[
               { icon: BookOpen, value: courseCount, label: "Курсов" },
               { icon: Users, value: `${enrollmentCount}+`, label: "Студентов" },
               { icon: Award, value: "4.9", label: "Средняя оценка" },
-            ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="px-6 py-10 text-center">
-                <Icon className="w-6 h-6 text-[#D4402F] mx-auto mb-3" />
-                <div className="text-3xl font-black text-[#0F0F0F]" style={{ fontFamily: "var(--font-mono)" }}>{value}</div>
-                <div className="text-xs text-[#787068] mt-1" style={{ fontFamily: "var(--font-sans)" }}>{label}</div>
+            ].map(({ icon: Icon, value, label }, i) => (
+              <div key={label} style={{ padding: "40px 24px", textAlign: "center", borderRight: i < 2 ? "1px solid var(--c-border)" : "none" }}>
+                <Icon size={22} style={{ color: "var(--c-red)", margin: "0 auto 12px" }} />
+                <div style={{ fontSize: 32, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-mono)" }}>{value}</div>
+                <div style={{ fontSize: 12, color: "var(--c-t3)", marginTop: 4, fontFamily: "var(--font-sans)" }}>{label}</div>
               </div>
             ))}
           </div>
         </section>
 
         {/* Values */}
-        <section className="border-b-2 border-[#0F0F0F]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#787068] mb-3" style={{ fontFamily: "var(--font-mono)" }}>
+        <section style={{ borderBottom: "1px solid var(--c-border)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px" }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 14 }}>
               Принципы
             </p>
-            <h2 className="text-4xl font-black text-[#0F0F0F] mb-12" style={{ fontFamily: "var(--font-display)" }}>КАК МЫ РАБОТАЕМ</h2>
-            <div className="grid sm:grid-cols-2 gap-5">
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 48 }}>Как мы работаем</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1, background: "var(--c-border)" }}>
               {VALUES.map((v, i) => (
-                <div key={v.title} className="border-2 border-[#0F0F0F] p-7 bg-white shadow-brutal">
-                  <div className="text-xs font-black text-[#787068] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
+                <div key={v.title} className="feature-card" style={{ padding: "32px" }}>
+                  <div style={{ fontSize: 12, fontWeight: 900, color: "var(--c-red)", marginBottom: 12, fontFamily: "var(--font-mono)" }}>
                     0{i + 1}
                   </div>
-                  <h3 className="text-lg font-black text-[#0F0F0F] mb-3" style={{ fontFamily: "var(--font-display)" }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: "var(--c-t1)", marginBottom: 12, fontFamily: "var(--font-display)" }}>
                     {v.title}
                   </h3>
-                  <p className="text-sm text-[#787068] leading-relaxed" style={{ fontFamily: "var(--font-sans)" }}>
+                  <p style={{ fontSize: 14, color: "var(--c-t3)", lineHeight: 1.65, fontFamily: "var(--font-sans)", margin: 0 }}>
                     {v.body}
                   </p>
                 </div>
@@ -115,37 +116,30 @@ export default async function AboutPage() {
 
         {/* Instructors */}
         {instructors.length > 0 && (
-          <section className="border-b-2 border-[#0F0F0F] bg-[#FDFCE8]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#787068] mb-3" style={{ fontFamily: "var(--font-mono)" }}>
+          <section style={{ borderBottom: "1px solid var(--c-border)", background: "var(--c-s1)" }}>
+            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px" }}>
+              <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 14 }}>
                 Команда
               </p>
-              <h2 className="text-4xl font-black text-[#0F0F0F] mb-12" style={{ fontFamily: "var(--font-display)" }}>ПРЕПОДАВАТЕЛИ</h2>
-              <div className="grid sm:grid-cols-2 gap-6">
+              <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 48 }}>Преподаватели</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
                 {instructors.map((inst) => {
                   const totalStudents = inst.courses.reduce((a, c) => a + c._count.enrollments, 0);
                   return (
-                    <div key={inst.id} className="bg-white border-2 border-[#0F0F0F] p-6 flex gap-5 shadow-brutal">
+                    <div key={inst.id} style={{ background: "var(--c-bg)", border: "1px solid var(--c-border)", padding: "28px", display: "flex", gap: 20 }}>
                       {inst.image ? (
-                        <Image
-                          src={inst.image}
-                          alt={inst.name ?? ""}
-                          width={72}
-                          height={72}
-                          unoptimized
-                          className="rounded-full border-2 border-[#0F0F0F] shrink-0 object-cover"
-                        />
+                        <Image src={inst.image} alt={inst.name ?? ""} width={72} height={72} unoptimized style={{ borderRadius: "50%", border: "1px solid var(--c-border)", objectFit: "cover", flexShrink: 0 }} />
                       ) : (
-                        <div className="w-18 h-18 rounded-full border-2 border-[#0F0F0F] bg-[#FAFAF7] flex items-center justify-center shrink-0 text-xl font-black" style={{ fontFamily: "var(--font-display)", width: 72, height: 72 }}>
+                        <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--c-s2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: "var(--c-t2)", fontFamily: "var(--font-display)", flexShrink: 0 }}>
                           {(inst.name ?? "?")[0]}
                         </div>
                       )}
                       <div>
-                        <h3 className="font-black text-[#0F0F0F] mb-0.5" style={{ fontFamily: "var(--font-display)" }}>{inst.name}</h3>
-                        <p className="text-xs text-[#787068] mb-3" style={{ fontFamily: "var(--font-mono)" }}>Senior Developer</p>
-                        <div className="flex gap-4 text-xs text-[#787068]" style={{ fontFamily: "var(--font-mono)" }}>
-                          <span>{inst.courses.length} курсов</span>
-                          <span>{totalStudents} студентов</span>
+                        <h3 style={{ fontWeight: 900, fontSize: 17, color: "var(--c-t1)", marginBottom: 4, fontFamily: "var(--font-display)" }}>{inst.name}</h3>
+                        <p style={{ fontSize: 12, color: "var(--c-t3)", marginBottom: 14, fontFamily: "var(--font-mono)" }}>Senior Developer</p>
+                        <div style={{ display: "flex", gap: 16, fontSize: 12, color: "var(--c-t3)", fontFamily: "var(--font-mono)" }}>
+                          <span><span style={{ color: "var(--c-amber)" }}>{inst.courses.length}</span> курсов</span>
+                          <span><span style={{ color: "var(--c-amber)" }}>{totalStudents}</span> студентов</span>
                         </div>
                       </div>
                     </div>
@@ -157,25 +151,22 @@ export default async function AboutPage() {
         )}
 
         {/* CTA */}
-        <section className="bg-[#0F0F0F] text-[#FAFAF7]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row items-center justify-between gap-8">
+        <section style={{ background: "var(--c-red)", position: "relative", overflow: "hidden" }}>
+          <div aria-hidden style={{ position: "absolute", top: "-40%", right: "-10%", width: 400, height: 400, borderRadius: "50%", background: "rgba(0,0,0,0.15)", pointerEvents: "none" }} />
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "72px 24px", display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-start", position: "relative" }}>
             <div>
-              <h2 className="text-3xl font-black" style={{ fontFamily: "var(--font-display)" }}>НАЧАТЬ УЧИТЬСЯ</h2>
-              <p className="text-[#787068] mt-2" style={{ fontFamily: "var(--font-sans)" }}>
+              <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>Начать учиться</h2>
+              <p style={{ color: "rgba(240,230,216,0.7)", marginTop: 8, fontFamily: "var(--font-sans)" }}>
                 Три бесплатных курса доступны без регистрации.
               </p>
             </div>
-            <Link
-              href="/courses"
-              className="shrink-0 inline-flex items-center gap-2 px-8 py-4 bg-[#D4402F] text-[#FAFAF7] font-black border-2 border-[#D4402F] shadow-[4px_4px_0_#FAFAF7] hover:shadow-[2px_2px_0_#FAFAF7] hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Все курсы <ArrowRight className="w-5 h-5" />
+            <Link href="/courses" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 32px", background: "var(--c-bg)", color: "var(--c-t1)", fontWeight: 900, fontFamily: "var(--font-display)", textDecoration: "none" }}>
+              Все курсы <ArrowRight size={18} />
             </Link>
           </div>
         </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

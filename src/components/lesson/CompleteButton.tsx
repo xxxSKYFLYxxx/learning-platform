@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface Props {
   lessonId: string;
@@ -36,17 +35,20 @@ export function CompleteButton({ lessonId, completed: initialCompleted, nextLess
     <button
       onClick={handleComplete}
       disabled={completed || loading}
-      className={cn(
-        "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
-        completed
-          ? "bg-success/10 text-success cursor-default"
-          : "bg-primary text-white hover:bg-primary/90"
-      )}
+      className={completed ? "" : "btn-red"}
+      style={{
+        display: "flex", alignItems: "center", gap: 8, padding: "11px 20px", fontSize: 14, fontWeight: 700,
+        border: "none", fontFamily: "var(--font-display)",
+        cursor: completed ? "default" : "pointer",
+        ...(completed
+          ? { background: "rgba(31,158,110,0.12)", color: "var(--c-green)" }
+          : {}),
+      }}
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
+        <Loader2 size={16} className="animate-spin" />
       ) : (
-        <CheckCircle className="w-4 h-4" />
+        <CheckCircle size={16} />
       )}
       {completed ? "Урок завершён" : "Отметить как пройденный"}
     </button>

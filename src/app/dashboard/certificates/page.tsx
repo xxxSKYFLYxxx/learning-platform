@@ -21,51 +21,41 @@ export default async function CertificatesPage() {
   });
 
   return (
-    <>
+    <div className="grain" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
       <Header />
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="font-display text-3xl font-bold text-primary mb-8">Мои сертификаты</h1>
+      <main style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 24px" }}>
+        <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 32 }}>Мои сертификаты</h1>
 
         {certificates.length === 0 ? (
-          <div className="text-center py-24 border border-dashed border-gray-200 rounded-2xl">
-            <Award className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-            <p className="text-muted">Завершите курс, чтобы получить сертификат</p>
-            <Link href="/courses" className="mt-4 inline-block text-sm text-secondary hover:underline">
-              К курсам
+          <div style={{ textAlign: "center", padding: "96px 0", border: "1px dashed var(--c-border)" }}>
+            <Award size={40} style={{ color: "var(--c-border-hi)", margin: "0 auto 16px" }} />
+            <p style={{ color: "var(--c-t3)", fontFamily: "var(--font-sans)" }}>Завершите курс, чтобы получить сертификат</p>
+            <Link href="/courses" className="link-muted" style={{ marginTop: 16, display: "inline-block", fontSize: 14, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
+              К курсам →
             </Link>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
             {certificates.map((cert) => (
-              <div key={cert.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="bg-gradient-to-br from-primary to-primary/80 p-8 flex flex-col items-center text-center text-white">
-                  <Award className="w-12 h-12 text-secondary mb-3" />
-                  <p className="text-xs text-white/60 uppercase tracking-widest mb-1">Сертификат</p>
-                  <h3 className="font-display font-bold text-lg leading-tight">{cert.course.title}</h3>
+              <div key={cert.id} className="course-card" style={{ overflow: "hidden" }}>
+                <div style={{ background: "linear-gradient(135deg, var(--c-s2), var(--c-bg))", padding: 32, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", borderBottom: "1px solid var(--c-border)" }}>
+                  <Award size={48} style={{ color: "var(--c-amber)", marginBottom: 12 }} />
+                  <p style={{ fontSize: 11, color: "var(--c-t3)", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6, fontFamily: "var(--font-mono)" }}>Сертификат</p>
+                  <h3 style={{ fontWeight: 900, fontSize: 17, lineHeight: 1.25, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>{cert.course.title}</h3>
                 </div>
-                <div className="p-4">
-                  <p className="text-xs text-muted mb-1">Выдан</p>
-                  <p className="text-sm font-medium text-text">
-                    {new Date(cert.issuedAt).toLocaleDateString("ru-RU", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
+                <div style={{ padding: 16 }}>
+                  <p style={{ fontSize: 11, color: "var(--c-t4)", marginBottom: 2, fontFamily: "var(--font-mono)" }}>Выдан</p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "var(--c-t1)", fontFamily: "var(--font-sans)" }}>
+                    {new Date(cert.issuedAt).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
                   </p>
-                  <p className="text-xs text-muted mt-2 font-mono truncate">{cert.uniqueCode}</p>
+                  <p style={{ fontSize: 11, color: "var(--c-t4)", marginTop: 8, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cert.uniqueCode}</p>
 
-                  <div className="flex gap-2 mt-4">
-                    <Link
-                      href={`/certificates/${cert.uniqueCode}`}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-gray-200 rounded-lg text-xs text-muted hover:border-primary hover:text-primary transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" /> Просмотр
+                  <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                    <Link href={`/certificates/${cert.uniqueCode}`} className="btn-ghost" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "8px", fontSize: 12, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
+                      <ExternalLink size={13} /> Просмотр
                     </Link>
-                    <Link
-                      href={`/api/certificates/${cert.uniqueCode}/pdf`}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-primary text-white rounded-lg text-xs hover:bg-primary/90 transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5" /> PDF
+                    <Link href={`/api/certificates/${cert.uniqueCode}/pdf`} className="btn-red" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "8px", fontSize: 12, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
+                      <Download size={13} /> PDF
                     </Link>
                   </div>
                 </div>
@@ -75,6 +65,6 @@ export default async function CertificatesPage() {
         )}
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

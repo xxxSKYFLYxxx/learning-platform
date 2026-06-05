@@ -6,13 +6,10 @@ import { Send, Mail, MessageSquare } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
-const TOPICS = [
-  "Вопрос по курсу",
-  "Технические проблемы",
-  "Оплата и возврат",
-  "Сотрудничество",
-  "Другое",
-];
+const TOPICS = ["Вопрос по курсу", "Технические проблемы", "Оплата и возврат", "Сотрудничество", "Другое"];
+
+const labelStyle: React.CSSProperties = { display: "block", fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--c-t2)", marginBottom: 8, fontFamily: "var(--font-mono)" };
+const fieldStyle: React.CSSProperties = { width: "100%", padding: "12px 16px", fontSize: 14, fontFamily: "var(--font-sans)", boxSizing: "border-box" };
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", topic: TOPICS[0], message: "" });
@@ -26,102 +23,61 @@ export default function ContactPage() {
   }
 
   return (
-    <>
+    <div className="grain" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
       <Header />
-      <main className="flex-1">
+      <main>
         {/* Hero */}
-        <section className="border-b-2 border-[#0F0F0F] bg-[#FDFCE8]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#787068] mb-3" style={{ fontFamily: "var(--font-mono)" }}>
+        <section style={{ borderBottom: "1px solid var(--c-border)", background: "var(--c-s1)", position: "relative", overflow: "hidden" }}>
+          <div aria-hidden style={{ position: "absolute", top: "-30%", right: "-5%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,var(--c-red-mid) 0%,transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "72px 24px", position: "relative" }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 14 }}>
               Связаться
             </p>
-            <h1 className="text-5xl md:text-6xl font-black text-[#0F0F0F] leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-              КОНТАКТЫ
+            <h1 style={{ fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", lineHeight: 1.05 }}>
+              Контакты
             </h1>
           </div>
         </section>
 
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="grid lg:grid-cols-[1fr_420px] gap-16">
+        <section style={{ maxWidth: 1280, margin: "0 auto", padding: "72px 24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 64 }}>
             {/* Form */}
             <div>
               {status === "sent" ? (
-                <div className="border-2 border-[#0F0F0F] bg-[#1A9E6E] text-[#FAFAF7] p-10 shadow-brutal text-center">
-                  <div className="text-4xl mb-4">✓</div>
-                  <h2 className="text-xl font-black mb-2" style={{ fontFamily: "var(--font-display)" }}>Сообщение отправлено</h2>
-                  <p className="text-sm opacity-80" style={{ fontFamily: "var(--font-sans)" }}>
+                <div style={{ border: "1px solid var(--c-green)", background: "rgba(31,158,110,0.1)", padding: 48, textAlign: "center" }}>
+                  <div style={{ fontSize: 40, marginBottom: 16, color: "var(--c-green)" }}>✓</div>
+                  <h2 style={{ fontSize: 20, fontWeight: 900, color: "var(--c-t1)", marginBottom: 8, fontFamily: "var(--font-display)" }}>Сообщение отправлено</h2>
+                  <p style={{ fontSize: 14, color: "var(--c-t3)", fontFamily: "var(--font-sans)" }}>
                     Ответим в течение одного рабочего дня.
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                  <div className="grid sm:grid-cols-2 gap-5">
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                     <div>
-                      <label className="block text-xs font-black uppercase tracking-widest text-[#0F0F0F] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
-                        Имя
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        className="w-full border-2 border-[#0F0F0F] px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#D4402F] transition-colors"
-                        style={{ fontFamily: "var(--font-sans)" }}
-                        placeholder="Иван Петров"
-                      />
+                      <label style={labelStyle}>Имя</label>
+                      <input required type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input-dark" style={fieldStyle} placeholder="Иван Петров" />
                     </div>
                     <div>
-                      <label className="block text-xs font-black uppercase tracking-widest text-[#0F0F0F] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
-                        Email
-                      </label>
-                      <input
-                        required
-                        type="email"
-                        value={form.email}
-                        onChange={(e) => setForm({ ...form, email: e.target.value })}
-                        className="w-full border-2 border-[#0F0F0F] px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#D4402F] transition-colors"
-                        style={{ fontFamily: "var(--font-sans)" }}
-                        placeholder="ivan@example.com"
-                      />
+                      <label style={labelStyle}>Email</label>
+                      <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input-dark" style={fieldStyle} placeholder="ivan@example.com" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-[#0F0F0F] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
-                      Тема
-                    </label>
-                    <select
-                      value={form.topic}
-                      onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                      className="w-full border-2 border-[#0F0F0F] px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#D4402F] transition-colors"
-                      style={{ fontFamily: "var(--font-sans)" }}
-                    >
-                      {TOPICS.map((t) => <option key={t}>{t}</option>)}
+                    <label style={labelStyle}>Тема</label>
+                    <select value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} className="input-dark" style={fieldStyle}>
+                      {TOPICS.map((t) => <option key={t} style={{ background: "var(--c-s1)" }}>{t}</option>)}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-[#0F0F0F] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
-                      Сообщение
-                    </label>
-                    <textarea
-                      required
-                      rows={6}
-                      value={form.message}
-                      onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      className="w-full border-2 border-[#0F0F0F] px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#D4402F] transition-colors resize-none"
-                      style={{ fontFamily: "var(--font-sans)" }}
-                      placeholder="Опишите ваш вопрос..."
-                    />
+                    <label style={labelStyle}>Сообщение</label>
+                    <textarea required rows={6} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="input-dark" style={{ ...fieldStyle, resize: "none" }} placeholder="Опишите ваш вопрос..." />
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={status === "sending"}
-                    className="self-start inline-flex items-center gap-2 px-8 py-3 bg-[#0F0F0F] text-[#FAFAF7] font-black text-sm border-2 border-[#0F0F0F] shadow-brutal hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    <Send className="w-4 h-4" />
+                  <button type="submit" disabled={status === "sending"} className="btn-red" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 32px", fontWeight: 900, fontSize: 14, border: "none", cursor: status === "sending" ? "not-allowed" : "pointer", opacity: status === "sending" ? 0.5 : 1, fontFamily: "var(--font-display)" }}>
+                    <Send size={16} />
                     {status === "sending" ? "Отправка..." : "Отправить"}
                   </button>
                 </form>
@@ -129,41 +85,33 @@ export default function ContactPage() {
             </div>
 
             {/* Info */}
-            <div className="flex flex-col gap-5">
-              <div className="border-2 border-[#0F0F0F] p-6 bg-white shadow-brutal">
-                <div className="flex items-center gap-3 mb-3">
-                  <Mail className="w-5 h-5 text-[#D4402F]" />
-                  <span className="text-xs font-black uppercase tracking-widest" style={{ fontFamily: "var(--font-mono)" }}>Email</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ border: "1px solid var(--c-border)", background: "var(--c-s1)", padding: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                  <Mail size={18} style={{ color: "var(--c-red)" }} />
+                  <span style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--c-t2)", fontFamily: "var(--font-mono)" }}>Email</span>
                 </div>
-                <p className="text-sm text-[#787068]" style={{ fontFamily: "var(--font-sans)" }}>
-                  Пишите напрямую:
-                </p>
-                <a href="mailto:hello@kurs.dev" className="text-sm font-semibold text-[#0F0F0F] hover:text-[#D4402F] transition-colors" style={{ fontFamily: "var(--font-mono)" }}>
-                  hello@kurs.dev
-                </a>
+                <p style={{ fontSize: 14, color: "var(--c-t3)", fontFamily: "var(--font-sans)", marginBottom: 4 }}>Пишите напрямую:</p>
+                <a href="mailto:hello@kurs.dev" style={{ fontSize: 14, fontWeight: 600, color: "var(--c-t1)", fontFamily: "var(--font-mono)", textDecoration: "none" }}>hello@kurs.dev</a>
               </div>
 
-              <div className="border-2 border-[#0F0F0F] p-6 bg-white shadow-brutal">
-                <div className="flex items-center gap-3 mb-3">
-                  <MessageSquare className="w-5 h-5 text-[#D4402F]" />
-                  <span className="text-xs font-black uppercase tracking-widest" style={{ fontFamily: "var(--font-mono)" }}>Время ответа</span>
+              <div style={{ border: "1px solid var(--c-border)", background: "var(--c-s1)", padding: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                  <MessageSquare size={18} style={{ color: "var(--c-red)" }} />
+                  <span style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--c-t2)", fontFamily: "var(--font-mono)" }}>Время ответа</span>
                 </div>
-                <p className="text-sm text-[#787068] leading-relaxed" style={{ fontFamily: "var(--font-sans)" }}>
+                <p style={{ fontSize: 14, color: "var(--c-t3)", lineHeight: 1.6, fontFamily: "var(--font-sans)" }}>
                   Отвечаем в течение одного рабочего дня. В выходные — в понедельник.
                 </p>
               </div>
 
-              <div className="border-2 border-[#0F0F0F] p-6 bg-[#FDFCE8]">
-                <p className="text-xs font-black uppercase tracking-widest text-[#787068] mb-3" style={{ fontFamily: "var(--font-mono)" }}>
-                  Частые вопросы
+              <div style={{ border: "1px solid var(--c-border)", background: "var(--c-bg)", padding: 24 }}>
+                <p style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--c-t3)", marginBottom: 12, fontFamily: "var(--font-mono)" }}>
+                  Документы
                 </p>
-                <ul className="text-sm text-[#787068] space-y-2" style={{ fontFamily: "var(--font-sans)" }}>
-                  <li>
-                    <Link href="/privacy" className="hover:text-[#0F0F0F] transition-colors">Политика конфиденциальности</Link>
-                  </li>
-                  <li>
-                    <Link href="/offer" className="hover:text-[#0F0F0F] transition-colors">Публичная оферта</Link>
-                  </li>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+                  <li><Link href="/privacy" className="link-cream" style={{ fontSize: 14, textDecoration: "none", fontFamily: "var(--font-sans)" }}>Политика конфиденциальности</Link></li>
+                  <li><Link href="/offer" className="link-cream" style={{ fontSize: 14, textDecoration: "none", fontFamily: "var(--font-sans)" }}>Публичная оферта</Link></li>
                 </ul>
               </div>
             </div>
@@ -171,6 +119,6 @@ export default function ContactPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

@@ -44,66 +44,66 @@ export default async function AdminDashboard() {
   ];
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <p className="text-[10px] font-black tracking-[0.25em] text-[#787068] mb-1" style={{ fontFamily: "var(--font-mono)" }}>ПАНЕЛЬ УПРАВЛЕНИЯ</p>
-        <h1 className="text-3xl font-black text-[#0F0F0F]" style={{ fontFamily: "var(--font-display)" }}>Дашборд</h1>
+    <div style={{ padding: 32, maxWidth: 1100, margin: "0 auto" }}>
+      <div style={{ marginBottom: 32 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", color: "var(--c-t3)", marginBottom: 4, fontFamily: "var(--font-mono)" }}>ПАНЕЛЬ УПРАВЛЕНИЯ</p>
+        <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>Дашборд</h1>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 40 }}>
         {STAT_CARDS.map(({ icon: Icon, label, value, href }) => {
           const inner = (
-            <div className="bg-white border-2 border-[#0F0F0F] shadow-brutal p-5 hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all">
-              <Icon className="w-5 h-5 text-[#D4402F] mb-3" />
-              <div className="text-3xl font-bold text-[#0F0F0F] mb-1" style={{ fontFamily: "var(--font-mono)" }}>{value}</div>
-              <div className="text-xs text-[#787068]" style={{ fontFamily: "var(--font-sans)" }}>{label}</div>
+            <div className="feature-card" style={{ padding: 20 }}>
+              <Icon size={20} style={{ color: "var(--c-red)", marginBottom: 12 }} />
+              <div style={{ fontSize: 30, fontWeight: 700, color: "var(--c-t1)", marginBottom: 4, fontFamily: "var(--font-mono)" }}>{value}</div>
+              <div style={{ fontSize: 12, color: "var(--c-t3)", fontFamily: "var(--font-sans)" }}>{label}</div>
             </div>
           );
-          return href ? <Link key={label} href={href}>{inner}</Link> : <div key={label}>{inner}</div>;
+          return href ? <Link key={label} href={href} style={{ textDecoration: "none" }}>{inner}</Link> : <div key={label}>{inner}</div>;
         })}
       </div>
 
-      {/* Instructor count badge */}
-      <div className="flex gap-3 mb-10">
-        <span className="px-3 py-1 border-2 border-[#0F0F0F] text-xs font-mono" style={{ fontFamily: "var(--font-mono)" }}>
-          Преподавателей: {instructorCount}
+      {/* Instructor count + new course */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 40, alignItems: "center" }}>
+        <span style={{ padding: "6px 12px", border: "1px solid var(--c-border)", fontSize: 12, color: "var(--c-t3)", fontFamily: "var(--font-mono)" }}>
+          Преподавателей: <span style={{ color: "var(--c-amber)" }}>{instructorCount}</span>
         </span>
-        <Link href="/admin/courses/new" className="px-3 py-1 bg-[#0F0F0F] text-[#FAFAF7] border-2 border-[#0F0F0F] text-xs font-black shadow-brutal-r hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all" style={{ fontFamily: "var(--font-display)" }}>
+        <Link href="/admin/courses/new" className="btn-red" style={{ padding: "6px 14px", fontSize: 12, fontWeight: 900, textDecoration: "none", fontFamily: "var(--font-display)" }}>
           + Новый курс
         </Link>
       </div>
 
       {/* Recent enrollments */}
       <div>
-        <h2 className="text-base font-black text-[#0F0F0F] mb-4" style={{ fontFamily: "var(--font-display)" }}>Последние заявки</h2>
-        <div className="bg-white border-2 border-[#0F0F0F]">
-          <table className="w-full text-sm">
+        <h2 style={{ fontSize: 16, fontWeight: 900, color: "var(--c-t1)", marginBottom: 16, fontFamily: "var(--font-display)" }}>Последние заявки</h2>
+        <div style={{ background: "var(--c-s1)", border: "1px solid var(--c-border)" }}>
+          <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
             <thead>
-              <tr className="border-b-2 border-[#0F0F0F]">
+              <tr style={{ borderBottom: "1px solid var(--c-border)" }}>
                 {["Студент", "Курс", "Сумма", "Дата"].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-[10px] font-black uppercase tracking-wider text-[#787068]" style={{ fontFamily: "var(--font-mono)" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--c-t3)", fontFamily: "var(--font-mono)" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {recentEnrollments.map((e) => (
-                <tr key={e.id} className="border-b border-[#E0DDD8] last:border-b-0 hover:bg-[#FAFAF7] transition-colors">
-                  <td className="px-4 py-3" style={{ fontFamily: "var(--font-sans)" }}>
-                    <div className="text-[#0F0F0F] font-medium text-xs">{e.user.name ?? "—"}</div>
-                    <div className="text-[#787068] text-[10px]">{e.user.email}</div>
+                <tr key={e.id} style={{ borderBottom: "1px solid var(--c-border)" }}>
+                  <td style={{ padding: "12px 16px", fontFamily: "var(--font-sans)" }}>
+                    <div style={{ color: "var(--c-t1)", fontWeight: 600, fontSize: 12 }}>{e.user.name ?? "—"}</div>
+                    <div style={{ color: "var(--c-t4)", fontSize: 10 }}>{e.user.email}</div>
                   </td>
-                  <td className="px-4 py-3 text-[#0F0F0F] text-xs max-w-[200px] truncate" style={{ fontFamily: "var(--font-sans)" }}>{e.course.title}</td>
-                  <td className="px-4 py-3 font-bold text-xs" style={{ fontFamily: "var(--font-mono)" }}>
+                  <td style={{ padding: "12px 16px", color: "var(--c-t2)", fontSize: 12, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "var(--font-sans)" }}>{e.course.title}</td>
+                  <td style={{ padding: "12px 16px", fontWeight: 700, fontSize: 12, color: e.course.isFree ? "var(--c-green)" : "var(--c-t1)", fontFamily: "var(--font-mono)" }}>
                     {e.course.isFree ? "FREE" : formatPrice(Number(e.course.price))}
                   </td>
-                  <td className="px-4 py-3 text-[#787068] text-[10px]" style={{ fontFamily: "var(--font-mono)" }}>
+                  <td style={{ padding: "12px 16px", color: "var(--c-t4)", fontSize: 10, fontFamily: "var(--font-mono)" }}>
                     {new Date(e.createdAt).toLocaleDateString("ru-RU")}
                   </td>
                 </tr>
               ))}
               {recentEnrollments.length === 0 && (
-                <tr><td colSpan={4} className="px-4 py-8 text-center text-[#787068] text-sm">Заявок пока нет</td></tr>
+                <tr><td colSpan={4} style={{ padding: "32px 16px", textAlign: "center", color: "var(--c-t3)", fontSize: 14 }}>Заявок пока нет</td></tr>
               )}
             </tbody>
           </table>

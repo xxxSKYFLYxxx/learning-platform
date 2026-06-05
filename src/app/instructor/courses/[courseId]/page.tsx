@@ -33,7 +33,7 @@ export default async function InstructorCoursePage({
   if (!course) notFound();
 
   return (
-    <>
+    <div className="grain admin-dark" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
       <Header />
       <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
@@ -88,6 +88,6 @@ export default async function InstructorCoursePage({
         </div>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

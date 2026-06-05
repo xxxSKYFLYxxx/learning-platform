@@ -42,3 +42,6 @@ next-env.d.ts
 
 /src/generated/prisma
 .env
+
+# Локальный handover с секретами
+HANDOVER_LEARNING_PLATFORM.md

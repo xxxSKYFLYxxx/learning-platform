@@ -90,32 +90,32 @@ export default async function LessonPage({
   const progressPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-surface">
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", background: "var(--c-bg)" }}>
       {/* Top bar */}
-      <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 shrink-0 gap-4">
-        <Link href={`/courses/${courseSlug}`} className="flex items-center gap-1.5 text-sm text-muted hover:text-text transition-colors shrink-0">
-          <ChevronLeft className="w-4 h-4" />
+      <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "var(--c-s1)", borderBottom: "1px solid var(--c-border)", flexShrink: 0, gap: 16 }}>
+        <Link href={`/courses/${courseSlug}`} className="link-cream" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, textDecoration: "none", flexShrink: 0, fontFamily: "var(--font-sans)" }}>
+          <ChevronLeft size={16} />
           {course.title}
         </Link>
 
-        <div className="flex-1 max-w-sm hidden md:block">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-gray-100 rounded-full h-1.5">
-              <div className="bg-secondary h-1.5 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+        <div style={{ flex: 1, maxWidth: 360 }} className="lesson-progress">
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ flex: 1, background: "var(--c-border)", height: 4 }}>
+              <div style={{ background: progressPct === 100 ? "var(--c-green)" : "var(--c-red)", height: 4, width: `${progressPct}%`, transition: "width 0.3s" }} />
             </div>
-            <span className="text-xs text-muted shrink-0">{completedLessons}/{totalLessons}</span>
+            <span style={{ fontSize: 12, color: "var(--c-t3)", flexShrink: 0, fontFamily: "var(--font-mono)" }}>{completedLessons}/{totalLessons}</span>
           </div>
         </div>
 
-        <Link href="/dashboard" className="text-xs text-muted hover:text-text transition-colors shrink-0">
+        <Link href="/dashboard" className="link-muted" style={{ fontSize: 12, textDecoration: "none", flexShrink: 0, fontFamily: "var(--font-sans)" }}>
           Мой кабинет
         </Link>
       </header>
 
       {/* Main layout */}
-      <div className="flex flex-1 overflow-hidden">
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {/* Sidebar */}
-        <div className="w-72 shrink-0 hidden lg:flex flex-col overflow-hidden border-r border-gray-100">
+        <div style={{ width: 288, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", borderRight: "1px solid var(--c-border)", background: "var(--c-s1)" }} className="lesson-sidebar">
           <CourseSidebar
             courseSlug={courseSlug}
             modules={sidebarModules}
@@ -125,45 +125,36 @@ export default async function LessonPage({
         </div>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <main style={{ flex: 1, overflowY: "auto" }}>
+          <div style={{ maxWidth: 896, margin: "0 auto", padding: "32px 24px" }}>
             {/* Player */}
             {lesson.muxPlaybackId ? (
-              <LessonPlayer
-                videoId={lesson.muxPlaybackId}
-                lessonId={lesson.id}
-              />
+              <LessonPlayer videoId={lesson.muxPlaybackId} lessonId={lesson.id} />
             ) : (
-              <div className="aspect-video bg-primary/5 rounded-xl flex items-center justify-center text-muted text-sm">
+              <div style={{ aspectRatio: "16/9", background: "var(--c-s2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--c-t3)", fontSize: 14, fontFamily: "var(--font-sans)", border: "1px solid var(--c-border)" }}>
                 Видео ещё не загружено
               </div>
             )}
 
             {/* Lesson header */}
-            <div className="mt-6">
-              <h1 className="font-display text-2xl font-bold text-primary">{lesson.title}</h1>
+            <div style={{ marginTop: 24 }}>
+              <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>{lesson.title}</h1>
               {lesson.duration && (
-                <p className="text-sm text-muted mt-1">{formatDuration(lesson.duration)}</p>
+                <p style={{ fontSize: 13, color: "var(--c-t3)", marginTop: 4, fontFamily: "var(--font-mono)" }}>{formatDuration(lesson.duration)}</p>
               )}
             </div>
 
             {/* Actions row */}
-            <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-100 flex-wrap gap-3">
-              <div className="flex items-center gap-3">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--c-border)", flexWrap: "wrap", gap: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 {prevLesson && (
-                  <Link
-                    href={`/learn/${courseSlug}/${prevLesson.id}`}
-                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 rounded-xl text-sm text-muted hover:border-primary hover:text-primary transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> Назад
+                  <Link href={`/learn/${courseSlug}/${prevLesson.id}`} className="btn-ghost" style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", fontSize: 14, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
+                    <ChevronLeft size={16} /> Назад
                   </Link>
                 )}
                 {nextLesson && (
-                  <Link
-                    href={`/learn/${courseSlug}/${nextLesson.id}`}
-                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 rounded-xl text-sm text-muted hover:border-primary hover:text-primary transition-colors"
-                  >
-                    Далее <ChevronRight className="w-4 h-4" />
+                  <Link href={`/learn/${courseSlug}/${nextLesson.id}`} className="btn-ghost" style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", fontSize: 14, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
+                    Далее <ChevronRight size={16} />
                   </Link>
                 )}
               </div>
@@ -177,13 +168,13 @@ export default async function LessonPage({
 
             {/* Course complete banner */}
             {progressPct === 100 && (
-              <div className="mt-8 p-6 bg-success/5 border border-success/20 rounded-2xl flex items-center gap-4">
-                <Award className="w-8 h-8 text-success shrink-0" />
+              <div style={{ marginTop: 32, padding: 24, background: "rgba(31,158,110,0.08)", border: "1px solid rgba(31,158,110,0.25)", display: "flex", alignItems: "center", gap: 16 }}>
+                <Award size={32} style={{ color: "var(--c-green)", flexShrink: 0 }} />
                 <div>
-                  <p className="font-semibold text-success">Курс пройден!</p>
-                  <p className="text-sm text-muted mt-0.5">
+                  <p style={{ fontWeight: 700, color: "var(--c-green)", fontFamily: "var(--font-display)" }}>Курс пройден!</p>
+                  <p style={{ fontSize: 14, color: "var(--c-t3)", marginTop: 2, fontFamily: "var(--font-sans)" }}>
                     Ваш сертификат доступен в{" "}
-                    <Link href="/dashboard/certificates" className="text-secondary hover:underline">
+                    <Link href="/dashboard/certificates" style={{ color: "var(--c-red)", textDecoration: "none" }}>
                       личном кабинете
                     </Link>
                   </p>
@@ -193,6 +184,11 @@ export default async function LessonPage({
           </div>
         </main>
       </div>
+
+      <style>{`
+        @media (max-width: 1024px) { .lesson-sidebar { display: none !important; } }
+        @media (max-width: 768px) { .lesson-progress { display: none !important; } }
+      `}</style>
     </div>
   );
 }

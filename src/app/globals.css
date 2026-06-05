@@ -253,6 +253,64 @@ body {
   color: var(--c-t2);
 }
 
+/* ━━ Admin / Instructor dark theme overrides ━━━━━━━━━━
+   Перекрашивает legacy Tailwind-классы внутри панелей,
+   чтобы не переписывать каждую CRUD-страницу вручную.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.admin-dark {
+  color: var(--c-t1);
+}
+/* Surfaces */
+.admin-dark .bg-white { background: var(--c-s1) !important; }
+.admin-dark .bg-\[\#FAFAF7\] { background: var(--c-s2) !important; }
+.admin-dark .bg-\[\#FDFCE8\] { background: var(--c-s2) !important; }
+.admin-dark .bg-surface { background: var(--c-s1) !important; }
+/* Dark blocks → keep dark but align tone */
+.admin-dark .bg-\[\#0F0F0F\] { background: var(--c-red) !important; }
+.admin-dark .bg-primary { background: var(--c-red) !important; }
+/* Text */
+.admin-dark .text-\[\#0F0F0F\] { color: var(--c-t1) !important; }
+.admin-dark .text-text { color: var(--c-t1) !important; }
+.admin-dark .text-primary { color: var(--c-t1) !important; }
+.admin-dark .text-\[\#787068\] { color: var(--c-t3) !important; }
+.admin-dark .text-muted { color: var(--c-t3) !important; }
+.admin-dark .text-\[\#FAFAF7\] { color: var(--c-t1) !important; }
+/* Borders */
+.admin-dark .border-\[\#0F0F0F\] { border-color: var(--c-border-hi) !important; }
+.admin-dark .border-\[\#E0DDD8\] { border-color: var(--c-border) !important; }
+.admin-dark .border-2 { border-width: 1px !important; }
+.admin-dark .divide-\[\#E0DDD8\] > * { border-color: var(--c-border) !important; }
+/* Brutalist shadows → soft glow in dark */
+.admin-dark .shadow-brutal,
+.admin-dark .shadow-brutal-sm,
+.admin-dark .shadow-brutal-r { box-shadow: none !important; }
+/* Hover rows */
+.admin-dark .hover\:bg-\[\#FAFAF7\]:hover { background: var(--c-s2) !important; }
+/* Inputs / selects */
+.admin-dark input,
+.admin-dark select,
+.admin-dark textarea {
+  background: var(--c-s1) !important;
+  border-color: var(--c-border) !important;
+  color: var(--c-t1) !important;
+}
+.admin-dark input::placeholder,
+.admin-dark textarea::placeholder { color: var(--c-t3) !important; }
+/* Tailwind gray scale */
+.admin-dark .border-gray-100,
+.admin-dark .border-gray-200,
+.admin-dark .border-gray-50 { border-color: var(--c-border) !important; }
+.admin-dark .bg-gray-100,
+.admin-dark .bg-gray-50 { background: var(--c-s2) !important; }
+.admin-dark .text-gray-300,
+.admin-dark .text-gray-200 { color: var(--c-border-hi) !important; }
+.admin-dark .text-secondary { color: var(--c-red) !important; }
+.admin-dark .text-success { color: var(--c-green) !important; }
+.admin-dark .bg-success\/10 { background: rgba(31,158,110,0.12) !important; }
+.admin-dark .bg-primary\/5 { background: var(--c-s2) !important; }
+.admin-dark .hover\:border-primary:hover { border-color: var(--c-red) !important; }
+.admin-dark .hover\:text-primary:hover { color: var(--c-red) !important; }
+
 /* ━━ Scrollbar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--c-bg); }

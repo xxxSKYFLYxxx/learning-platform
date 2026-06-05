@@ -54,7 +54,7 @@ export default async function InstructorPage() {
   ];
 
   return (
-    <>
+    <div className="grain admin-dark" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
       <Header />
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-10">
@@ -130,6 +130,6 @@ export default async function InstructorPage() {
         )}
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
