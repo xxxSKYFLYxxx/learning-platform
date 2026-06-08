@@ -130,6 +130,7 @@ model Lesson {
   id            String   @id @default(cuid())
   moduleId      String
   title         String
+  content       String?  @db.Text
   muxAssetId    String?
   muxPlaybackId String?
   duration      Int?

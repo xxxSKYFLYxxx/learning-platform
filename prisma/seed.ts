@@ -2,6 +2,19 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
+import { getLessonContent } from "./lesson-content";
+
+// Префиксы курсов для подбора контента
+const COURSE_PREFIX: Record<string, string> = {
+  "osnovy-javascript":                "js",
+  "react-s-nulya":                    "react",
+  "typescript-dlya-razrabotchikov":   "ts",
+  "nodejs-i-express":                 "node",
+  "python-dlya-nachinayushchikh":     "python",
+  "git-i-github":                     "git",
+  "css-i-tailwind":                   "css",
+  "nextjs-polny-kurs":                "nextjs",
+};
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
 const adapter = new PrismaPg(pool);
@@ -87,7 +100,7 @@ async function main() {
       slug: "react-s-nulya",
       title: "React с нуля до Pro",
       description: "Современный React с хуками, контекстом, React Query и TypeScript. Создадим полноценное приложение с авторизацией, API-запросами и деплоем на Vercel.",
-      price: 4900, isFree: false, level: "INTERMEDIATE" as const,
+      price: null, isFree: true, level: "INTERMEDIATE" as const,
       instructorId: ivan.id, imageUrl: IMG.react,
       modules: [
         { title: "Основы React", lessons: [
@@ -121,7 +134,7 @@ async function main() {
       slug: "typescript-dlya-razrabotchikov",
       title: "TypeScript для разработчиков",
       description: "Строгая типизация, интерфейсы, дженерики, утилитарные типы и декораторы. Переходим с JS на TS без боли — с реальными примерами из production.",
-      price: 3500, isFree: false, level: "INTERMEDIATE" as const,
+      price: null, isFree: true, level: "INTERMEDIATE" as const,
       instructorId: maria.id, imageUrl: IMG.ts,
       modules: [
         { title: "Базовая типизация", lessons: [
@@ -147,7 +160,7 @@ async function main() {
       slug: "nodejs-i-express",
       title: "Node.js и Express: Backend с нуля",
       description: "Создаём REST API на Node.js + Express с авторизацией JWT, базой данных PostgreSQL, ORM Prisma и деплоем на сервер. Всё как в реальных проектах.",
-      price: 3900, isFree: false, level: "INTERMEDIATE" as const,
+      price: null, isFree: true, level: "INTERMEDIATE" as const,
       instructorId: ivan.id, imageUrl: IMG.node,
       modules: [
         { title: "Основы Node.js", lessons: [
@@ -232,7 +245,7 @@ async function main() {
       slug: "css-i-tailwind",
       title: "Современный CSS и Tailwind",
       description: "От основ CSS до Flexbox, Grid и Tailwind CSS. Научимся верстать адаптивные интерфейсы быстро и красиво. Включает компонентный подход и анимации.",
-      price: 2500, isFree: false, level: "BEGINNER" as const,
+      price: null, isFree: true, level: "BEGINNER" as const,
       instructorId: maria.id, imageUrl: IMG.css,
       modules: [
         { title: "CSS фундамент", lessons: [
@@ -258,7 +271,7 @@ async function main() {
       slug: "nextjs-polny-kurs",
       title: "Next.js: полный курс",
       description: "App Router, SSR, ISR, Server Actions, авторизация, деплой на Vercel. Самый полный русскоязычный курс по Next.js 14+ от архитектуры до production.",
-      price: 5900, isFree: false, level: "ADVANCED" as const,
+      price: null, isFree: true, level: "ADVANCED" as const,
       instructorId: ivan.id, imageUrl: IMG.nextjs,
       modules: [
         { title: "App Router и файловая структура", lessons: [
@@ -309,12 +322,16 @@ async function main() {
 
       for (let lIdx = 0; lIdx < modulesData[mIdx].lessons.length; lIdx++) {
         const l = modulesData[mIdx].lessons[lIdx];
+        const prefix = COURSE_PREFIX[courseFields.slug];
+        const content = prefix ? getLessonContent(prefix, mIdx, lIdx) : null;
+
         await prisma.lesson.create({
           data: {
             moduleId: mod.id,
             title: l.title,
             duration: l.dur,
-            isFree: (l as { free?: boolean }).free ?? false,
+            content,
+            isFree: true,         // Все уроки бесплатные
             sortOrder: lIdx,
           },
         });

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Award } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { LessonPlayer } from "@/components/lesson/LessonPlayer";
+import { LessonContent } from "@/components/lesson/LessonContent";
 import { CourseSidebar } from "@/components/lesson/CourseSidebar";
 import { CompleteButton } from "@/components/lesson/CompleteButton";
 import { formatDuration } from "@/lib/utils";
@@ -127,22 +127,25 @@ export default async function LessonPage({
         {/* Content */}
         <main style={{ flex: 1, overflowY: "auto" }}>
           <div style={{ maxWidth: 896, margin: "0 auto", padding: "32px 24px" }}>
-            {/* Player */}
-            {lesson.muxPlaybackId ? (
-              <LessonPlayer videoId={lesson.muxPlaybackId} lessonId={lesson.id} />
-            ) : (
-              <div style={{ aspectRatio: "16/9", background: "var(--c-s2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--c-t3)", fontSize: 14, fontFamily: "var(--font-sans)", border: "1px solid var(--c-border)" }}>
-                Видео ещё не загружено
-              </div>
-            )}
-
             {/* Lesson header */}
-            <div style={{ marginTop: 24 }}>
-              <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>{lesson.title}</h1>
+            <div style={{ marginBottom: 24 }}>
+              <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--c-t4)", fontFamily: "var(--font-mono)", marginBottom: 8 }}>
+                УРОК {lessonIndex + 1} / {totalLessons}
+              </p>
+              <h1 style={{ fontSize: 32, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", lineHeight: 1.15, marginBottom: 8 }}>{lesson.title}</h1>
               {lesson.duration && (
-                <p style={{ fontSize: 13, color: "var(--c-t3)", marginTop: 4, fontFamily: "var(--font-mono)" }}>{formatDuration(lesson.duration)}</p>
+                <p style={{ fontSize: 13, color: "var(--c-t3)", fontFamily: "var(--font-mono)" }}>~ {formatDuration(lesson.duration)} чтения</p>
               )}
             </div>
+
+            {/* Lesson content */}
+            {lesson.content ? (
+              <LessonContent content={lesson.content} />
+            ) : (
+              <div style={{ padding: 48, background: "var(--c-s1)", border: "1px solid var(--c-border)", textAlign: "center", color: "var(--c-t3)", fontFamily: "var(--font-sans)" }}>
+                Материал урока готовится. Скоро здесь появится подробный разбор темы с примерами кода.
+              </div>
+            )}
 
             {/* Actions row */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--c-border)", flexWrap: "wrap", gap: 12 }}>
