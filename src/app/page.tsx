@@ -433,26 +433,43 @@ export default async function HomePage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
               {instructors.map((inst) => {
                 const students = inst.courses.reduce((a, c) => a + c._count.enrollments, 0);
+                const isIvan = inst.email === "ivan@kurs.dev";
+                const role  = isIvan ? "Senior Frontend · ex-Yandex" : "Senior Fullstack · ex-Тинькофф";
+                const bio   = isIvan
+                  ? "8 лет в коммерческой разработке, последние 4 года — фронтенд-команда в Яндекс.Маркете. Учит React и архитектуре фронтенда так, чтобы потом не было стыдно показать код на интервью."
+                  : "10 лет на бэкенде: писала платёжные системы в Тинькофф, теперь развивает свой стартап. Объясняет Python и Node как практик — без академической воды, только то, что пригодится в работе.";
+
                 return (
-                  <div key={inst.id} style={{ background: T.bg, border: `1px solid ${T.b}`, padding: "28px", display: "flex", gap: 20 }}>
-                    {inst.image ? (
-                      <Image src={inst.image} alt={inst.name ?? ""} width={72} height={72} unoptimized style={{ borderRadius: "50%", objectFit: "cover", border: `1px solid ${T.b}`, flexShrink: 0 }} />
-                    ) : (
-                      <div style={{ width: 72, height: 72, borderRadius: "50%", background: T.s2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: T.t2, fontFamily: "var(--font-display)", flexShrink: 0 }}>
-                        {(inst.name ?? "?")[0]}
-                      </div>
-                    )}
-                    <div style={{ flex: 1 }}>
+                  <div key={inst.id} style={{ background: T.bg, border: `1px solid ${T.b}`, padding: "28px", display: "flex", gap: 20, alignItems: "flex-start" }}>
+                    {/* Аватар — фиксированный квадрат с overflow */}
+                    <div style={{ width: 72, height: 72, flexShrink: 0, borderRadius: "50%", overflow: "hidden", border: `1px solid ${T.b}`, background: T.s2, position: "relative" }}>
+                      {inst.image ? (
+                        <Image
+                          src={inst.image}
+                          alt={inst.name ?? ""}
+                          fill
+                          sizes="72px"
+                          unoptimized
+                          style={{ objectFit: "cover", objectPosition: "center" }}
+                        />
+                      ) : (
+                        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900, color: T.t2, fontFamily: "var(--font-display)" }}>
+                          {(inst.name ?? "?")[0]}
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <h3 style={{ fontSize: 17, fontWeight: 900, color: T.t1, fontFamily: "var(--font-display)", marginBottom: 4 }}>{inst.name}</h3>
-                      <p style={{ fontSize: 12, color: T.t3, fontFamily: "var(--font-mono)", marginBottom: 16 }}>Senior Developer · Преподаватель КУРС</p>
-                      <div style={{ display: "flex", gap: 20, fontSize: 12, fontFamily: "var(--font-mono)", color: T.t3 }}>
+                      <p style={{ fontSize: 12, color: T.t3, fontFamily: "var(--font-mono)", marginBottom: 16 }}>{role}</p>
+                      <div style={{ display: "flex", gap: 20, fontSize: 12, fontFamily: "var(--font-mono)", color: T.t3, flexWrap: "wrap" }}>
                         <span><span style={{ color: T.amb }}>{inst._count.courses}</span> курсов</span>
                         <span><span style={{ color: T.amb }}>{students}</span> студентов</span>
                         <span style={{ color: T.amb }}>★ 4.9</span>
                       </div>
                       <Div style={{ margin: "16px 0" }} />
                       <p style={{ fontSize: 13, lineHeight: 1.6, color: T.t3, fontFamily: "var(--font-sans)", margin: 0 }}>
-                        Практикующий разработчик с опытом в коммерческих проектах. Преподаёт конкретные навыки, применимые в реальной работе.
+                        {bio}
                       </p>
                     </div>
                   </div>
