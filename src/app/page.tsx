@@ -157,9 +157,9 @@ export default async function HomePage() {
                     <div key={text} className="hero-word" style={{ animationDelay: delay }}>
                       <span style={{
                         display: "block",
-                        fontSize: "clamp(72px, 10vw, 108px)",
-                        fontWeight: 900, lineHeight: 0.88,
-                        letterSpacing: "-0.03em",
+                        fontSize: "clamp(36px, 7.5vw, 108px)",
+                        fontWeight: 900, lineHeight: 0.95,
+                        letterSpacing: "-0.04em",
                         fontFamily: "var(--font-display)",
                         color,
                         textShadow: glow ? "0 0 60px var(--c-red-glow), 0 0 120px var(--c-red-lo)" : "none",

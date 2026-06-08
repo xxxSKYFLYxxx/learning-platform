@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Unbounded, Manrope, Space_Mono } from "next/font/google";
+import { Unbounded, Manrope, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/layout/Providers";
 import Script from "next/script";
 import "./globals.css";
@@ -16,10 +16,10 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const spaceMono = Space_Mono({
+const jetbrainsMono = JetBrains_Mono({
   variable: "--font-space-mono",
-  weight: ["400", "700"],
-  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  subsets: ["latin", "cyrillic"],
   display: "swap",
 });
 
@@ -59,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${unbounded.variable} ${manrope.variable} ${spaceMono.variable} h-full`}
+      className={`${unbounded.variable} ${manrope.variable} ${jetbrainsMono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
         <Providers>{children}</Providers>

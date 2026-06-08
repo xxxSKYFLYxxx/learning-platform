@@ -21,6 +21,9 @@ export function LessonContent({ content }: Props) {
         fontFamily: "var(--font-sans)",
         fontSize: 16,
         lineHeight: 1.75,
+        maxWidth: "100%",
+        overflowWrap: "break-word",
+        wordBreak: "break-word",
       }}
     >
       <ReactMarkdown
