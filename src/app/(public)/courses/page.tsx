@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CourseCard } from "@/components/course/CourseCard";
 import { prisma } from "@/lib/prisma";
+import { getFallbackCourses, withDbFallback } from "@/lib/public-fallbacks";
 import type { CourseLevel } from "@prisma/client";
 import { Search, SlidersHorizontal } from "lucide-react";
 import type { Metadata } from "next";
@@ -10,32 +11,34 @@ import type { Metadata } from "next";
 interface SearchParams { level?: string; isFree?: string; q?: string; sort?: string }
 
 async function getCourses(filters: SearchParams) {
-  const rows = await prisma.course.findMany({
-    where: {
-      published: true,
-      ...(filters.level ? { level: filters.level as CourseLevel } : {}),
-      ...(filters.isFree === "true" ? { isFree: true } : {}),
-      ...(filters.q ? { OR: [
-        { title: { contains: filters.q, mode: "insensitive" } },
-        { description: { contains: filters.q, mode: "insensitive" } },
-      ]} : {}),
-    },
-    orderBy: filters.sort === "price_asc"  ? { price: "asc" }
-           : filters.sort === "price_desc" ? { price: "desc" }
-           : filters.sort === "newest"     ? { createdAt: "desc" }
-           : { enrollments: { _count: "desc" } },
-    include: {
-      instructor: { select: { id: true, name: true, image: true } },
-      _count: { select: { enrollments: true, reviews: true } },
-      reviews: { select: { rating: true } },
-    },
-  });
+  return withDbFallback((async () => {
+    const rows = await prisma.course.findMany({
+      where: {
+        published: true,
+        ...(filters.level ? { level: filters.level as CourseLevel } : {}),
+        ...(filters.isFree === "true" ? { isFree: true } : {}),
+        ...(filters.q ? { OR: [
+          { title: { contains: filters.q, mode: "insensitive" } },
+          { description: { contains: filters.q, mode: "insensitive" } },
+        ]} : {}),
+      },
+      orderBy: filters.sort === "price_asc"  ? { price: "asc" }
+             : filters.sort === "price_desc" ? { price: "desc" }
+             : filters.sort === "newest"     ? { createdAt: "desc" }
+             : { enrollments: { _count: "desc" } },
+      include: {
+        instructor: { select: { id: true, name: true, image: true } },
+        _count: { select: { enrollments: true, reviews: true } },
+        reviews: { select: { rating: true } },
+      },
+    });
 
-  return rows.map((r) => ({
-    ...r,
-    price: r.price ? Number(r.price) : null,
-    avgRating: r.reviews.length > 0 ? r.reviews.reduce((a, rv) => a + rv.rating, 0) / r.reviews.length : undefined,
-  }));
+    return rows.map((r) => ({
+      ...r,
+      price: r.price ? Number(r.price) : null,
+      avgRating: r.reviews.length > 0 ? r.reviews.reduce((a, rv) => a + rv.rating, 0) / r.reviews.length : undefined,
+    }));
+  })(), getFallbackCourses(filters));
 }
 
 const LEVELS = [

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
+import Link from "next/link";
 
 export const metadata = { title: "Admin — Заявки" };
 
@@ -8,13 +9,20 @@ const STATUS_LABELS: Record<string, string> = {
   COMPLETED: "Завершена",
   REFUNDED: "Возврат",
 };
-const STATUS_COLORS: Record<string, string> = {
-  ACTIVE: "text-[#1A9E6E] border-[#1A9E6E]",
-  COMPLETED: "text-[#E8A020] border-[#E8A020]",
-  REFUNDED: "text-[#D4402F] border-[#D4402F]",
+
+const STATUS_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  ACTIVE: { bg: "rgba(31,158,110,0.1)", text: "var(--c-green)", border: "var(--c-green)" },
+  COMPLETED: { bg: "rgba(232,160,32,0.1)", text: "var(--c-amber)", border: "var(--c-amber)" },
+  REFUNDED: { bg: "rgba(217,64,47,0.1)", text: "var(--c-red)", border: "var(--c-red)" },
 };
 
-export default async function AdminEnrollmentsPage() {
+export default async function AdminEnrollmentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const params = await searchParams;
+  const activeStatus = params.status && params.status in STATUS_LABELS ? params.status : "ALL";
   const enrollments = await prisma.enrollment.findMany({
     orderBy: { createdAt: "desc" },
     include: {
@@ -23,46 +31,144 @@ export default async function AdminEnrollmentsPage() {
     },
   });
 
+  const statusCounts = enrollments.reduce((acc, e) => {
+    acc[e.status] = (acc[e.status] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const visibleEnrollments = activeStatus === "ALL"
+    ? enrollments
+    : enrollments.filter((enrollment) => enrollment.status === activeStatus);
+
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <p className="text-[10px] font-black tracking-[0.25em] text-[#787068] mb-1" style={{ fontFamily: "var(--font-mono)" }}>УПРАВЛЕНИЕ</p>
-        <h1 className="text-3xl font-black text-[#0F0F0F]" style={{ fontFamily: "var(--font-display)" }}>Заявки</h1>
-        <p className="text-sm text-[#787068] mt-1" style={{ fontFamily: "var(--font-sans)" }}>Всего: {enrollments.length}</p>
+    <div style={{ padding: 32, maxWidth: 1200, margin: "0 auto" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .enrollments-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+          }
+          .status-filters {
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+          .status-filters a {
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+          }
+          table {
+            font-size: 12px;
+          }
+          th, td {
+            padding: 8px 12px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .enrollments-table-wrapper {
+            overflow-x: auto;
+          }
+        }
+      `}</style>
+
+      <div style={{ marginBottom: 32 }}>
+        <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", color: "var(--c-t3)", marginBottom: 4, fontFamily: "var(--font-mono)" }}>УПРАВЛЕНИЕ</p>
+        <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>Заявки</h1>
+        <p style={{ fontSize: 14, color: "var(--c-t3)", marginTop: 4, fontFamily: "var(--font-sans)" }}>
+          Всего: <span style={{ color: "var(--c-t1)", fontWeight: 600 }}>{enrollments.length}</span>
+        </p>
       </div>
 
-      <div className="bg-white border-2 border-[#0F0F0F]">
-        <table className="w-full text-sm">
+      {/* Status Filter */}
+      <div className="status-filters" style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+        <Link
+          href="/admin/enrollments"
+          style={{
+            padding: "6px 12px",
+            border: "1px solid var(--c-border-hi)",
+            borderRadius: 4,
+            background: activeStatus === "ALL" ? "var(--c-red)" : "transparent",
+            color: activeStatus === "ALL" ? "var(--c-bg)" : "var(--c-t2)",
+            fontSize: 12,
+            fontWeight: 900,
+            fontFamily: "var(--font-mono)",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            textDecoration: "none"
+          }}
+        >
+          Все ({enrollments.length})
+        </Link>
+        {Object.entries(STATUS_LABELS).map(([status, label]) => {
+          const st = STATUS_STYLES[status];
+          return (
+            <Link
+              key={status}
+              href={`/admin/enrollments?status=${status}`}
+              style={{
+                padding: "6px 12px",
+                border: `1px solid ${st.border}`,
+                borderRadius: 4,
+                background: activeStatus === status ? st.text : st.bg,
+                color: activeStatus === status ? "var(--c-bg)" : st.text,
+                fontSize: 12,
+                fontWeight: 900,
+                fontFamily: "var(--font-mono)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                textDecoration: "none"
+              }}
+            >
+              {label} ({statusCounts[status] ?? 0})
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Table */}
+      <div className="enrollments-table-wrapper" style={{ background: "var(--c-s1)", border: "1px solid var(--c-border)", borderRadius: 8 }}>
+        <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
           <thead>
-            <tr className="border-b-2 border-[#0F0F0F] bg-[#FAFAF7]">
+            <tr style={{ borderBottom: "1px solid var(--c-border-hi)" }}>
               {["Студент", "Курс", "Сумма", "Статус", "Дата"].map((h) => (
-                <th key={h} className="text-left px-4 py-3 text-[10px] font-black uppercase tracking-wider text-[#787068]" style={{ fontFamily: "var(--font-mono)" }}>{h}</th>
+                <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--c-t3)", fontFamily: "var(--font-mono)" }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {enrollments.map((e) => (
-              <tr key={e.id} className="border-b border-[#E0DDD8] last:border-b-0 hover:bg-[#FAFAF7] transition-colors">
-                <td className="px-4 py-3">
-                  <div className="text-[#0F0F0F] text-xs font-medium" style={{ fontFamily: "var(--font-sans)" }}>{e.user.name ?? "—"}</div>
-                  <div className="text-[#787068] text-[10px]">{e.user.email}</div>
-                </td>
-                <td className="px-4 py-3 text-[#0F0F0F] text-xs max-w-[200px] truncate" style={{ fontFamily: "var(--font-sans)" }}>{e.course.title}</td>
-                <td className="px-4 py-3 font-bold text-xs" style={{ fontFamily: "var(--font-mono)" }}>
-                  {e.course.isFree ? "FREE" : formatPrice(Number(e.course.price))}
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`text-[10px] font-black px-2 py-0.5 border ${STATUS_COLORS[e.status] ?? "text-[#787068] border-[#787068]"}`} style={{ fontFamily: "var(--font-mono)" }}>
-                    {STATUS_LABELS[e.status] ?? e.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-[10px] text-[#787068]" style={{ fontFamily: "var(--font-mono)" }}>
-                  {new Date(e.createdAt).toLocaleDateString("ru-RU")}
-                </td>
-              </tr>
-            ))}
-            {enrollments.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-[#787068] text-sm">Заявок пока нет</td></tr>
+            {visibleEnrollments.map((e) => {
+              const st = STATUS_STYLES[e.status] ?? { bg: "transparent", text: "var(--c-t3)", border: "var(--c-border)" };
+              return (
+                <tr key={e.id} data-status={e.status} className="enrollment-row" style={{ borderBottom: "1px solid var(--c-border)" }}>
+                  <td style={{ padding: "12px 16px" }}>
+                    <div style={{ color: "var(--c-t1)", fontWeight: 600, fontSize: 13, fontFamily: "var(--font-sans)" }}>{e.user.name ?? "—"}</div>
+                    <div style={{ color: "var(--c-t4)", fontSize: 11, fontFamily: "var(--font-sans)" }}>{e.user.email}</div>
+                  </td>
+                  <td style={{ padding: "12px 16px", color: "var(--c-t2)", fontSize: 12, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "var(--font-sans)" }}>{e.course.title}</td>
+                  <td style={{ padding: "12px 16px", fontWeight: 700, fontSize: 12, color: e.course.isFree ? "var(--c-green)" : "var(--c-t1)", fontFamily: "var(--font-mono)" }}>
+                    {e.course.isFree ? "FREE" : formatPrice(Number(e.course.price))}
+                  </td>
+                  <td style={{ padding: "12px 16px" }}>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 900,
+                      padding: "4px 8px",
+                      fontFamily: "var(--font-mono)",
+                      border: `1px solid ${st.border}`,
+                      color: st.text,
+                      background: st.bg,
+                      borderRadius: 4
+                    }}>
+                      {STATUS_LABELS[e.status] ?? e.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: "12px 16px", color: "var(--c-t4)", fontSize: 11, fontFamily: "var(--font-mono)" }}>
+                    {new Date(e.createdAt).toLocaleDateString("ru-RU")}
+                  </td>
+                </tr>
+              );
+            })}
+            {visibleEnrollments.length === 0 && (
+              <tr><td colSpan={5} style={{ padding: "32px 16px", textAlign: "center", color: "var(--c-t3)", fontSize: 14, fontFamily: "var(--font-sans)" }}>Заявок пока нет</td></tr>
             )}
           </tbody>
         </table>

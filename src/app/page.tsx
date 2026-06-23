@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
 import { CourseCard } from "@/components/course/CourseCard";
+import { fallbackHomeData, withDbFallback } from "@/lib/public-fallbacks";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,39 +13,41 @@ export const metadata: Metadata = {
   description: "Практические курсы по программированию на русском языке. JavaScript, React, TypeScript, Python, Node.js. Реальные проекты, сертификаты, живые преподаватели.",
 };
 
-async function getData() {
-  const [courses, courseCount, enrollmentCount, totalLessons, instructors, reviews, reviewCount] = await Promise.all([
-    prisma.course.findMany({
-      where: { published: true }, take: 6,
-      orderBy: { enrollments: { _count: "desc" } },
-      include: {
-        instructor: { select: { id: true, name: true, image: true } },
-        _count: { select: { enrollments: true, reviews: true } },
-        reviews: { select: { rating: true } },
-      },
-    }),
-    prisma.course.count({ where: { published: true } }),
-    prisma.enrollment.count(),
-    prisma.lesson.count(),
-    prisma.user.findMany({
-      where: { role: "INSTRUCTOR" },
-      include: {
-        courses: { where: { published: true }, select: { id: true, _count: { select: { enrollments: true } } } },
-        _count: { select: { courses: true } },
-      },
-    }),
-    prisma.review.findMany({
-      where: { rating: { gte: 4 } }, take: 6,
-      orderBy: { createdAt: "desc" },
-      include: { user: { select: { name: true, image: true } }, course: { select: { title: true } } },
-    }),
-    prisma.review.count(),
-  ]);
+async function getData(): Promise<any> {
+  return withDbFallback<any>((async () => {
+    const [courses, courseCount, enrollmentCount, totalLessons, instructors, reviews, reviewCount] = await Promise.all([
+      prisma.course.findMany({
+        where: { published: true }, take: 6,
+        orderBy: { enrollments: { _count: "desc" } },
+        include: {
+          instructor: { select: { id: true, name: true, image: true } },
+          _count: { select: { enrollments: true, reviews: true } },
+          reviews: { select: { rating: true } },
+        },
+      }),
+      prisma.course.count({ where: { published: true } }),
+      prisma.enrollment.count(),
+      prisma.lesson.count(),
+      prisma.user.findMany({
+        where: { role: "INSTRUCTOR" },
+        include: {
+          courses: { where: { published: true }, select: { id: true, _count: { select: { enrollments: true } } } },
+          _count: { select: { courses: true } },
+        },
+      }),
+      prisma.review.findMany({
+        where: { rating: { gte: 4 } }, take: 6,
+        orderBy: { createdAt: "desc" },
+        include: { user: { select: { name: true, image: true } }, course: { select: { title: true } } },
+      }),
+      prisma.review.count(),
+    ]);
 
-  return {
-    courses: courses.map(c => ({ ...c, price: c.price ? Number(c.price) : null, avgRating: c.reviews.length > 0 ? c.reviews.reduce((a, r) => a + r.rating, 0) / c.reviews.length : undefined })),
-    courseCount, enrollmentCount, totalLessons, instructors, reviews, reviewCount,
-  };
+    return {
+      courses: courses.map(c => ({ ...c, price: c.price ? Number(c.price) : null, avgRating: c.reviews.length > 0 ? c.reviews.reduce((a, r) => a + r.rating, 0) / c.reviews.length : undefined })),
+      courseCount, enrollmentCount, totalLessons, instructors, reviews, reviewCount,
+    };
+  })(), fallbackHomeData);
 }
 
 const T = {
@@ -337,7 +340,7 @@ export default async function HomePage() {
               </Link>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-              {courses.map(c => <CourseCard key={c.id} course={c} />)}
+              {courses.map((c: any) => <CourseCard key={c.id} course={c} />)}
             </div>
           </div>
         </section>
@@ -431,8 +434,8 @@ export default async function HomePage() {
               <H2>Преподаватели</H2>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
-              {instructors.map((inst) => {
-                const students = inst.courses.reduce((a, c) => a + c._count.enrollments, 0);
+              {instructors.map((inst: any) => {
+                const students = inst.courses.reduce((a: number, c: any) => a + c._count.enrollments, 0);
                 const isIvan = inst.email === "ivan@kurs.dev";
                 const role  = isIvan ? "Senior Frontend · ex-Yandex" : "Senior Fullstack · ex-Тинькофф";
                 const bio   = isIvan
@@ -497,7 +500,7 @@ export default async function HomePage() {
               </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-              {reviews.map((r) => (
+              {reviews.map((r: any) => (
                 <div key={r.id} style={{ background: T.s1, border: `1px solid ${T.b}`, padding: "24px", display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "flex", gap: 3, marginBottom: 16 }}>
                     {[1,2,3,4,5].map(i => <span key={i} style={{ color: i <= r.rating ? T.amb : T.b, fontSize: 13 }}>★</span>)}

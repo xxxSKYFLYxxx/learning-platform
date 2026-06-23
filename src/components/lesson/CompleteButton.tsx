@@ -18,14 +18,20 @@ export function CompleteButton({ lessonId, completed: initialCompleted, nextLess
   const handleComplete = async () => {
     if (completed || loading) return;
     setLoading(true);
-    await fetch("/api/progress", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lessonId, completed: true }),
-    });
+    let saved = false;
+    try {
+      const response = await fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonId, completed: true }),
+      });
+      saved = response.ok;
+    } catch {
+      // Demo/fallback lessons can be completed locally when the database is unavailable.
+    }
     setCompleted(true);
     setLoading(false);
-    router.refresh();
+    if (saved) router.refresh();
     if (nextLessonHref) {
       setTimeout(() => router.push(nextLessonHref), 400);
     }

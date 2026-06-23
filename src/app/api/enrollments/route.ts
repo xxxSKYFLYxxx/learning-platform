@@ -4,12 +4,18 @@ import { prisma } from "@/lib/prisma";
 import { createPayment } from "@/lib/yookassa";
 
 export async function GET(req: NextRequest) {
+  const courseId = req.nextUrl.searchParams.get("courseId");
+  if (courseId === "fallback-layout") {
+    return NextResponse.redirect(
+      new URL("/learn/verstka-s-nulya/fallback-layout-lesson-0-0", req.url)
+    );
+  }
+
   const session = await auth();
   if (!session?.user) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  const courseId = req.nextUrl.searchParams.get("courseId");
   if (!courseId) {
     return NextResponse.json({ error: "Missing courseId" }, { status: 400 });
   }

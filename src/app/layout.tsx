@@ -1,27 +1,7 @@
 import type { Metadata } from "next";
-import { Unbounded, Manrope, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/layout/Providers";
 import Script from "next/script";
 import "./globals.css";
-
-const unbounded = Unbounded({
-  variable: "--font-unbounded",
-  subsets: ["latin", "cyrillic"],
-  display: "swap",
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin", "cyrillic"],
-  display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-space-mono",
-  weight: ["400", "500", "700"],
-  subsets: ["latin", "cyrillic"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -57,10 +37,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="ru"
-      className={`${unbounded.variable} ${manrope.variable} ${jetbrainsMono.variable} h-full`}
-    >
+    <html lang="ru" className="h-full">
       <body className="min-h-full flex flex-col antialiased">
         <Providers>{children}</Providers>
 

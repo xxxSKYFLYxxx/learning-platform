@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/prisma";
+import { fallbackCourses, withDbFallback } from "@/lib/public-fallbacks";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.AUTH_URL ?? "http://localhost:3002";
 
-  const courses = await prisma.course.findMany({
+  const courses = await withDbFallback(prisma.course.findMany({
     where: { published: true },
     select: { slug: true, updatedAt: true },
-  });
+  }), fallbackCourses.map((course) => ({ slug: course.slug, updatedAt: new Date() })));
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base,                  lastModified: new Date(), changeFrequency: "weekly",  priority: 1 },

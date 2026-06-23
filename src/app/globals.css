@@ -14,9 +14,9 @@
   --color-primary:   #0F0F0F;
   --color-secondary: #D4402F;
   --color-text:      #0F0F0F;
-  --font-display: var(--font-unbounded);
-  --font-sans:    var(--font-manrope);
-  --font-mono:    var(--font-space-mono);
+  --font-display: Arial, Helvetica, sans-serif;
+  --font-sans:    Arial, Helvetica, sans-serif;
+  --font-mono:    "Cascadia Mono", "Consolas", monospace;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -321,4 +321,44 @@ body {
 ::selection {
   background: var(--c-red);
   color: var(--c-t1);
+}
+
+/* ━━ Responsive grid helpers ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 768px) {
+  [style*="grid-template-columns: \"repeat(4, 1fr)\""],
+  [style*="grid-template-columns: repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  [style*="grid-template-columns: \"repeat(3, 1fr)\""],
+  [style*="grid-template-columns: repeat(3, 1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ━━ Fade-in animation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+/* ━━ Responsive helpers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 1024px) {
+  [style*="grid-template-columns: \"1fr 400px\""],
+  [style*="grid-template-columns: 1fr 400px"],
+  [style*="grid-template-columns: \"1fr 380px\""],
+  [style*="grid-template-columns: 1fr 380px"],
+  [style*="gap: 64"],
+  [style*="gap: 48"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  [style*="display: \"grid\""][style*="repeat(4, 1fr)"],
+  [style*="display: grid"][style*="repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  [style*="display: \"grid\""][style*="repeat(3, 1fr)"],
+  [style*="display: grid"][style*="repeat(3, 1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
 }

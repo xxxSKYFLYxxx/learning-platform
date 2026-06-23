@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Users, BookOpen, Award } from "lucide-react";
+import { ArrowRight, Users, BookOpen, Award, Shield, Zap, Target, Clock } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
+import { fallbackHomeData, withDbFallback } from "@/lib/public-fallbacks";
 
 export const metadata: Metadata = {
   title: "О нас",
@@ -14,12 +15,16 @@ export const metadata: Metadata = {
 };
 
 async function getAboutData() {
-  const [courseCount, enrollmentCount, instructors] = await Promise.all([
+  const data = Promise.all([
     prisma.course.count({ where: { published: true } }),
     prisma.enrollment.count(),
     prisma.user.findMany({
       where: { role: "INSTRUCTOR" },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
         courses: {
           where: { published: true },
           select: { id: true, _count: { select: { enrollments: true } } },
@@ -27,6 +32,13 @@ async function getAboutData() {
       },
     }),
   ]);
+
+  const [courseCount, enrollmentCount, instructors] = await withDbFallback(data, [
+    fallbackHomeData.courseCount,
+    fallbackHomeData.enrollmentCount,
+    fallbackHomeData.instructors,
+  ]);
+
   return { courseCount, enrollmentCount, instructors };
 }
 
@@ -34,18 +46,40 @@ const VALUES = [
   {
     title: "Только практика",
     body: "Каждый курс строится вокруг реального проекта. Теория — минимум, необходимый для понимания. Всё остальное время — руки в коде.",
+    icon: Target,
   },
   {
     title: "Без воды",
     body: "Средний урок — 12 минут. Мы уважаем ваше время и не растягиваем материал ради хронометража.",
+    icon: Zap,
   },
   {
     title: "На русском",
     body: "Вся платформа, преподаватели и поддержка — на русском языке. Никакого языкового барьера между вами и знаниями.",
+    icon: Shield,
   },
   {
     title: "Доступные цены",
     body: "Мы против подписной модели. Платите раз — получаете пожизненный доступ со всеми обновлениями.",
+    icon: Clock,
+  },
+];
+
+const GUARANTEES = [
+  {
+    title: "14 дней на возврат",
+    body: "Если курс не подошел — вернем деньги без вопросов. Достаточно написать на hello@kurs.dev в течение 14 дней.",
+    icon: "💰",
+  },
+  {
+    title: "Пожизненный доступ",
+    body: "Все обновления курса бесплатно. Даже если вы прошли курс год назад — новые материалы откроются автоматически.",
+    icon: "♾️",
+  },
+  {
+    title: "Сертификат после курса",
+    body: "Сертификат с уникальным кодом верификации. Можно добавить в резюме и LinkedIn. Проверяется на платформе.",
+    icon: "🎓",
   },
 ];
 
@@ -54,6 +88,17 @@ export default async function AboutPage() {
 
   return (
     <div className="grain" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .stats-grid { grid-template-columns: 1fr !important; }
+          .stats-grid > div { border-right: none !important; border-bottom: 1px solid var(--c-border); }
+          .stats-grid > div:last-child { border-bottom: none !important; }
+          .values-grid { grid-template-columns: 1fr !important; }
+          .instructors-grid { grid-template-columns: 1fr !important; }
+          .mission-grid { grid-template-columns: 1fr !important; }
+          .guarantees-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <Header />
       <main>
         {/* Hero */}
@@ -74,7 +119,7 @@ export default async function AboutPage() {
 
         {/* Stats */}
         <section style={{ borderBottom: "1px solid var(--c-border)", background: "var(--c-s1)" }}>
-          <div style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
+          <div className="stats-grid" style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
             {[
               { icon: BookOpen, value: courseCount, label: "Курсов" },
               { icon: Users, value: `${enrollmentCount}+`, label: "Студентов" },
@@ -89,6 +134,51 @@ export default async function AboutPage() {
           </div>
         </section>
 
+        {/* Mission */}
+        <section style={{ borderBottom: "1px solid var(--c-border)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px" }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 14 }}>
+              Наша миссия
+            </p>
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 48 }}>
+              Почему мы это делаем
+            </h2>
+            <div className="mission-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
+              <div>
+                <p style={{ fontSize: 16, color: "var(--c-t2)", lineHeight: 1.75, fontFamily: "var(--font-sans)", marginBottom: 24 }}>
+                  Мы верим, что качественное образование в IT должно быть доступным. Не только по цене, но и по формату — без лишних барьеров, на родном языке, с фокусом на результат.
+                </p>
+                <p style={{ fontSize: 16, color: "var(--c-t2)", lineHeight: 1.75, fontFamily: "var(--font-sans)" }}>
+                  Наша цель — помочь людям войти в профессию разработчика за 6-12 месяцев, а не растягивать обучение на годы. Мы убираем всё лишнее и оставляем только то, что действительно работает.
+                </p>
+              </div>
+              <div style={{ background: "var(--c-s1)", border: "1px solid var(--c-border)", padding: 32 }}>
+                <h3 style={{ fontSize: 20, fontWeight: 900, color: "var(--c-t1)", marginBottom: 16, fontFamily: "var(--font-display)" }}>
+                  Что это значит для вас
+                </h3>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+                  <li style={{ display: "flex", alignItems: "flex-start", gap: 12, fontSize: 14, color: "var(--c-t2)", fontFamily: "var(--font-sans)" }}>
+                    <span style={{ color: "var(--c-green)", fontSize: 18, lineHeight: 1 }}>✓</span>
+                    <span>Курсы от практиков, а не теоретиков</span>
+                  </li>
+                  <li style={{ display: "flex", alignItems: "flex-start", gap: 12, fontSize: 14, color: "var(--c-t2)", fontFamily: "var(--font-sans)" }}>
+                    <span style={{ color: "var(--c-green)", fontSize: 18, lineHeight: 1 }}>✓</span>
+                    <span>Реальные проекты в портфолио</span>
+                  </li>
+                  <li style={{ display: "flex", alignItems: "flex-start", gap: 12, fontSize: 14, color: "var(--c-t2)", fontFamily: "var(--font-sans)" }}>
+                    <span style={{ color: "var(--c-green)", fontSize: 18, lineHeight: 1 }}>✓</span>
+                    <span>Поддержка преподавателей и сообщества</span>
+                  </li>
+                  <li style={{ display: "flex", alignItems: "flex-start", gap: 12, fontSize: 14, color: "var(--c-t2)", fontFamily: "var(--font-sans)" }}>
+                    <span style={{ color: "var(--c-green)", fontSize: 18, lineHeight: 1 }}>✓</span>
+                    <span>Прозрачные цены без скрытых платежей</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Values */}
         <section style={{ borderBottom: "1px solid var(--c-border)" }}>
           <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px" }}>
@@ -96,9 +186,10 @@ export default async function AboutPage() {
               Принципы
             </p>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 48 }}>Как мы работаем</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1, background: "var(--c-border)" }}>
+            <div className="values-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1, background: "var(--c-border)" }}>
               {VALUES.map((v, i) => (
                 <div key={v.title} className="feature-card" style={{ padding: "32px" }}>
+                  <v.icon size={24} style={{ color: "var(--c-red)", marginBottom: 16 }} />
                   <div style={{ fontSize: 12, fontWeight: 900, color: "var(--c-red)", marginBottom: 12, fontFamily: "var(--font-mono)" }}>
                     0{i + 1}
                   </div>
@@ -114,19 +205,44 @@ export default async function AboutPage() {
           </div>
         </section>
 
+        {/* Guarantees */}
+        <section style={{ borderBottom: "1px solid var(--c-border)", background: "var(--c-s1)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px" }}>
+            <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 14 }}>
+              Гарантии
+            </p>
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 48 }}>
+              Наши обещания
+            </h2>
+            <div className="guarantees-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+              {GUARANTEES.map((g) => (
+                <div key={g.title} style={{ background: "var(--c-bg)", border: "1px solid var(--c-border)", padding: 32 }}>
+                  <div style={{ fontSize: 48, marginBottom: 16 }}>{g.icon}</div>
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: "var(--c-t1)", marginBottom: 12, fontFamily: "var(--font-display)" }}>
+                    {g.title}
+                  </h3>
+                  <p style={{ fontSize: 14, color: "var(--c-t3)", lineHeight: 1.65, fontFamily: "var(--font-sans)", margin: 0 }}>
+                    {g.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Instructors */}
         {instructors.length > 0 && (
-          <section style={{ borderBottom: "1px solid var(--c-border)", background: "var(--c-s1)" }}>
+          <section style={{ borderBottom: "1px solid var(--c-border)" }}>
             <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px" }}>
               <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--c-t3)", fontFamily: "var(--font-mono)", marginBottom: 14 }}>
                 Команда
               </p>
               <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 48 }}>Преподаватели</h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+              <div className="instructors-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
                 {instructors.map((inst) => {
                   const totalStudents = inst.courses.reduce((a, c) => a + c._count.enrollments, 0);
                   return (
-                    <div key={inst.id} style={{ background: "var(--c-bg)", border: "1px solid var(--c-border)", padding: "28px", display: "flex", gap: 20 }}>
+                    <div key={inst.id} style={{ background: "var(--c-s1)", border: "1px solid var(--c-border)", padding: "28px", display: "flex", gap: 20 }}>
                       {inst.image ? (
                         <Image src={inst.image} alt={inst.name ?? ""} width={72} height={72} unoptimized style={{ borderRadius: "50%", border: "1px solid var(--c-border)", objectFit: "cover", flexShrink: 0 }} />
                       ) : (

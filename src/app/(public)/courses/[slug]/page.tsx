@@ -6,11 +6,13 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ReviewForm } from "@/components/course/ReviewForm";
 import { formatPrice, formatDuration } from "@/lib/utils";
+import { getFallbackCourseBySlug, withDbFallback } from "@/lib/public-fallbacks";
 import type { Metadata } from "next";
 
 async function getCourse(slug: string) {
-  return prisma.course.findUnique({
+  return withDbFallback<any>(prisma.course.findUnique({
     where: { slug, published: true },
     include: {
       instructor: { select: { id: true, name: true, image: true } },
@@ -27,7 +29,20 @@ async function getCourse(slug: string) {
       },
       _count: { select: { enrollments: true, reviews: true } },
     },
-  });
+  }), getFallbackCourseBySlug(slug));
+}
+
+async function getEnrollmentStatus(userId: string | undefined, courseId: string) {
+  if (!userId || courseId.startsWith("fallback-")) return false;
+
+  return withDbFallback(
+    prisma.enrollment
+      .findUnique({
+        where: { userId_courseId: { userId, courseId } },
+      })
+      .then(Boolean),
+    false
+  );
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -39,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const url = `${base}/courses/${slug}`;
   const avgRating =
     course.reviews.length > 0
-      ? course.reviews.reduce((a, r) => a + r.rating, 0) / course.reviews.length
+      ? course.reviews.reduce((a: number, r: any) => a + r.rating, 0) / course.reviews.length
       : null;
 
   return {
@@ -73,20 +88,19 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
 
   if (!course) notFound();
 
-  const isEnrolled = session?.user
-    ? !!(await prisma.enrollment.findUnique({
-        where: { userId_courseId: { userId: session.user.id!, courseId: course.id } },
-      }))
-    : false;
+  const isFallbackCourse = course.id.startsWith("fallback-");
+  const isEnrolled = await getEnrollmentStatus(session?.user?.id, course.id);
+  const canStartCourse = isEnrolled || isFallbackCourse;
+  const firstLessonHref = `/learn/${course.slug}/${course.modules[0]?.lessons[0]?.id ?? ""}`;
 
-  const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0);
+  const totalLessons = course.modules.reduce((acc: number, m: any) => acc + m.lessons.length, 0);
   const totalDuration = course.modules.reduce(
-    (acc, m) => acc + m.lessons.reduce((a, l) => a + (l.duration ?? 0), 0),
+    (acc: number, m: any) => acc + m.lessons.reduce((a: number, l: any) => a + (l.duration ?? 0), 0),
     0
   );
   const avgRating =
     course.reviews.length > 0
-      ? course.reviews.reduce((a, r) => a + r.rating, 0) / course.reviews.length
+      ? course.reviews.reduce((a: number, r: any) => a + r.rating, 0) / course.reviews.length
       : null;
 
   const base = process.env.AUTH_URL ?? "http://localhost:3002";
@@ -214,12 +228,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 {course.isFree ? "Бесплатно" : formatPrice(Number(course.price))}
               </div>
 
-              {isEnrolled ? (
+              {canStartCourse ? (
                 <Link
-                  href={`/learn/${course.slug}/${course.modules[0]?.lessons[0]?.id ?? ""}`}
+                  href={firstLessonHref}
                   style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px", background: "var(--c-green)", color: "#fff", fontWeight: 900, fontFamily: "var(--font-display)", textDecoration: "none", fontSize: 14 }}
                 >
-                  <PlayCircle size={18} /> Продолжить обучение
+                  <PlayCircle size={18} /> {isFallbackCourse ? "Начать курс" : "Продолжить обучение"}
                 </Link>
               ) : (
                 <Link
@@ -244,7 +258,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         <section style={{ maxWidth: 1280, margin: "0 auto", padding: "64px 24px" }}>
           <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 24 }}>Программа курса</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {course.modules.map((mod) => (
+            {course.modules.map((mod: any) => (
               <details key={mod.id} className="course-module" style={{ border: "1px solid var(--c-border)", overflow: "hidden", background: "var(--c-s1)" }}>
                 <summary style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 18, cursor: "pointer", listStyle: "none" }}>
                   <span style={{ fontWeight: 600, color: "var(--c-t1)", fontFamily: "var(--font-sans)", fontSize: 15 }}>{mod.title}</span>
@@ -254,7 +268,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   </div>
                 </summary>
                 <div style={{ borderTop: "1px solid var(--c-border)" }}>
-                  {mod.lessons.map((lesson) => (
+                  {mod.lessons.map((lesson: any) => (
                     <div key={lesson.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 18px", borderBottom: "1px solid var(--c-border)" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: "var(--c-t3)", fontFamily: "var(--font-sans)" }}>
                         <PlayCircle size={15} style={{ flexShrink: 0 }} />
@@ -275,14 +289,23 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         </section>
 
         {/* Reviews */}
-        {course.reviews.length > 0 && (
-          <section style={{ background: "var(--c-s1)", borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)" }}>
-            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "64px 24px" }}>
-              <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 32 }}>
-                Отзывы ({course._count.reviews})
-              </h2>
+        <section style={{ background: "var(--c-s1)", borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "64px 24px" }}>
+            <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)", marginBottom: 32 }}>
+              Отзывы ({course._count.reviews})
+            </h2>
+
+            {/* Review form for enrolled students */}
+            {isEnrolled && !isFallbackCourse && (
+              <div style={{ marginBottom: 40 }}>
+                <ReviewForm courseId={course.id} />
+              </div>
+            )}
+
+            {/* Existing reviews */}
+            {course.reviews.length > 0 && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-                {course.reviews.map((review) => (
+                {course.reviews.map((review: any) => (
                   <div key={review.id} style={{ background: "var(--c-bg)", border: "1px solid var(--c-border)", padding: 24 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                       {review.user.image && (
@@ -301,9 +324,15 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   </div>
                 ))}
               </div>
-            </div>
-          </section>
-        )}
+            )}
+
+            {course.reviews.length === 0 && isEnrolled && !isFallbackCourse && (
+              <div style={{ textAlign: "center", padding: "40px 0", color: "var(--c-t3)", fontFamily: "var(--font-sans)" }}>
+                Будьте первым, кто оставит отзыв об этом курсе!
+              </div>
+            )}
+          </div>
+        </section>
       </main>
       <Footer />
 

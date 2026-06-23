@@ -5,9 +5,11 @@ const PROTECTED_PREFIXES = ["/dashboard", "/instructor", "/admin", "/learn"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+  const isFallbackLesson =
+    pathname.startsWith("/learn/verstka-s-nulya/fallback-layout-lesson-");
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
 
-  if (isProtected && !req.auth) {
+  if (isProtected && !isFallbackLesson && !req.auth) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
