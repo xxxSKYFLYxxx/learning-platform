@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 import { getLessonContent } from "./lesson-content";
+import { getLayoutCourse } from "./layout-course";
 
 // Префиксы курсов для подбора контента
 const COURSE_PREFIX: Record<string, string> = {
@@ -36,6 +37,7 @@ const IMG = {
   git:       PX(546819),    // source code on screen
   css:       PX(270404),    // colorful code coder coding
   nextjs:    PX(25437427),  // computer monitor displaying lines of code
+  layout:    PX(196644),    // web design layout sketch
   // Instructor photos
   instructorM: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop",
   instructorF: "https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop",
@@ -300,6 +302,7 @@ async function main() {
         ]},
       ],
     },
+    getLayoutCourse(maria.id, IMG.layout),
   ];
 
   for (const courseData of courses) {
@@ -323,7 +326,7 @@ async function main() {
       for (let lIdx = 0; lIdx < modulesData[mIdx].lessons.length; lIdx++) {
         const l = modulesData[mIdx].lessons[lIdx];
         const prefix = COURSE_PREFIX[courseFields.slug];
-        const content = prefix ? getLessonContent(prefix, mIdx, lIdx) : null;
+        const content = "content" in l ? l.content : prefix ? getLessonContent(prefix, mIdx, lIdx) : null;
 
         await prisma.lesson.create({
           data: {
