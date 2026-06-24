@@ -88,6 +88,9 @@ function LoginForm() {
             {loading && <Loader2 size={16} className="animate-spin" />}
             Войти
           </button>
+          <div style={{ padding: "10px 12px", border: "1px solid var(--c-border)", background: "var(--c-bg)", color: "var(--c-t3)", fontSize: 12, lineHeight: 1.6, fontFamily: "var(--font-mono)" }}>
+            Демо-админ: admin@kurs.dev / password123
+          </div>
         </form>
 
         <p style={{ textAlign: "center", fontSize: 14, color: "var(--c-t3)", marginTop: 20, fontFamily: "var(--font-sans)" }}>
