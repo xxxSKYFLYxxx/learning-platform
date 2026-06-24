@@ -1,44 +1,115 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { BookOpen, Award, PlayCircle, TrendingUp } from "lucide-react";
+import { Award, BookOpen, PlayCircle, TrendingUp } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { formatDuration } from "@/lib/utils";
+import { fallbackCourses, getFallbackCourseBySlug, withDbFallback } from "@/lib/public-fallbacks";
 
-async function getDashboardData(userId: string) {
-  const enrollments = await prisma.enrollment.findMany({
-    where: { userId, status: "ACTIVE" },
-    include: {
+type DashboardEnrollment = {
+  id: string;
+  course: {
+    slug: string;
+    title: string;
+    imageUrl: string | null;
+    modules: Array<{
+      lessons: Array<{
+        id: string;
+        duration: number | null;
+      }>;
+    }>;
+  };
+};
+
+type DashboardData = {
+  enrollments: DashboardEnrollment[];
+  certificates: number;
+  completedLessons: number;
+  completedLessonIds: Set<string>;
+};
+
+function getDemoEnrollments(): DashboardEnrollment[] {
+  return fallbackCourses.slice(0, 3).map((course, index) => {
+    const detailedCourse = getFallbackCourseBySlug(course.slug);
+
+    return {
+      id: `demo-enrollment-${index}`,
       course: {
-        include: {
-          modules: {
-            include: { lessons: { select: { id: true, duration: true } } },
-          },
-        },
+        slug: course.slug,
+        title: course.title,
+        imageUrl: course.imageUrl,
+        modules:
+          detailedCourse?.modules.map((module) => ({
+            lessons: module.lessons.map((lesson) => ({
+              id: lesson.id,
+              duration: lesson.duration,
+            })),
+          })) ?? [],
       },
-    },
-    orderBy: { createdAt: "desc" },
+    };
   });
-
-  const certificates = await prisma.certificate.count({ where: { userId } });
-
-  const completedLessons = await prisma.lessonProgress.count({
-    where: { userId, completed: true },
-  });
-
-  return { enrollments, certificates, completedLessons };
 }
 
-function calcProgress(enrollment: Awaited<ReturnType<typeof getDashboardData>>["enrollments"][0], completedIds: Set<string>) {
-  const totalLessons = enrollment.course.modules.reduce((a, m) => a + m.lessons.length, 0);
+function getDemoDashboardData(): DashboardData {
+  return {
+    enrollments: getDemoEnrollments(),
+    certificates: 0,
+    completedLessons: 0,
+    completedLessonIds: new Set<string>(),
+  };
+}
+
+async function getDashboardData(userId: string): Promise<DashboardData> {
+  const data = await withDbFallback(
+    Promise.all([
+      prisma.enrollment.findMany({
+        where: { userId, status: "ACTIVE" },
+        include: {
+          course: {
+            include: {
+              modules: {
+                include: { lessons: { select: { id: true, duration: true } } },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.certificate.count({ where: { userId } }),
+      prisma.lessonProgress.count({
+        where: { userId, completed: true },
+      }),
+      prisma.lessonProgress.findMany({
+        where: { userId, completed: true },
+        select: { lessonId: true },
+      }),
+    ]),
+    null
+  );
+
+  if (!data) return getDemoDashboardData();
+
+  const [enrollments, certificates, completedLessons, completedProgress] = data;
+  return {
+    enrollments,
+    certificates,
+    completedLessons,
+    completedLessonIds: new Set(completedProgress.map((progress) => progress.lessonId)),
+  };
+}
+
+function calcProgress(enrollment: DashboardEnrollment, completedIds: Set<string>) {
+  const totalLessons = enrollment.course.modules.reduce((sum, module) => sum + module.lessons.length, 0);
   if (!totalLessons) return 0;
+
   const done = enrollment.course.modules.reduce(
-    (a, m) => a + m.lessons.filter((l) => completedIds.has(l.id)).length,
+    (sum, module) => sum + module.lessons.filter((lesson) => completedIds.has(lesson.id)).length,
     0
   );
+
   return Math.round((done / totalLessons) * 100);
 }
 
@@ -48,16 +119,7 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const { enrollments, certificates, completedLessons } = await getDashboardData(session.user.id!);
-
-  const completedLessonIds = new Set(
-    (
-      await prisma.lessonProgress.findMany({
-        where: { userId: session.user.id!, completed: true },
-        select: { lessonId: true },
-      })
-    ).map((p) => p.lessonId)
-  );
+  const { enrollments, certificates, completedLessons, completedLessonIds } = await getDashboardData(session.user.id!);
 
   const stats = [
     { icon: BookOpen, label: "Курсов", value: enrollments.length },
@@ -69,15 +131,14 @@ export default async function DashboardPage() {
     <div className="grain" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
       <Header />
       <main style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 24px" }}>
-        {/* Greeting */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 40, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             {session.user.image && (
               <Image src={session.user.image} alt={session.user.name ?? ""} width={56} height={56} unoptimized style={{ borderRadius: "50%", border: "1px solid var(--c-border)" }} />
             )}
             <div>
               <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>
-                Привет, {session.user.name?.split(" ")[0] ?? "Студент"}!
+                Привет, {session.user.name?.split(" ")[0] ?? "студент"}!
               </h1>
               <p style={{ color: "var(--c-t3)", fontSize: 14, marginTop: 2, fontFamily: "var(--font-sans)" }}>Продолжайте обучение</p>
             </div>
@@ -87,8 +148,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 48 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 48 }}>
           {stats.map(({ icon: Icon, label, value }) => (
             <div key={label} style={{ background: "var(--c-s1)", border: "1px solid var(--c-border)", padding: 24, textAlign: "center" }}>
               <Icon size={22} style={{ color: "var(--c-red)", margin: "0 auto 8px" }} />
@@ -98,8 +158,7 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        {/* Courses */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 24 }}>
           <h2 style={{ fontSize: 22, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>Мои курсы</h2>
           <Link href="/courses" className="link-muted" style={{ fontSize: 14, textDecoration: "none", fontFamily: "var(--font-sans)" }}>Найти ещё →</Link>
         </div>
@@ -113,13 +172,14 @@ export default async function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
             {enrollments.map((enrollment) => {
               const progress = calcProgress(enrollment, completedLessonIds);
               const totalDuration = enrollment.course.modules.reduce(
-                (a, m) => a + m.lessons.reduce((b, l) => b + (l.duration ?? 0), 0),
+                (sum, module) => sum + module.lessons.reduce((lessonSum, lesson) => lessonSum + (lesson.duration ?? 0), 0),
                 0
               );
+
               return (
                 <div key={enrollment.id} className="course-card" style={{ overflow: "hidden" }}>
                   {enrollment.course.imageUrl ? (
