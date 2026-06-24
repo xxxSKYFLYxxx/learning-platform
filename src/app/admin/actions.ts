@@ -129,3 +129,12 @@ export async function updateUserRole(userId: string, role: Role) {
   await prisma.user.update({ where: { id: userId }, data: { role } });
   revalidatePath("/admin/users");
 }
+
+// ── REVIEWS ────────────────────────────────────────────────
+
+export async function deleteReview(reviewId: string) {
+  await requireAdminOnly();
+  await prisma.review.delete({ where: { id: reviewId } });
+  revalidatePath("/admin");
+  revalidatePath("/admin/courses");
+}

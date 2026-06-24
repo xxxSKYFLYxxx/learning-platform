@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { BookOpen, Users, ShoppingCart, TrendingUp } from "lucide-react";
+import { BookOpen, Users, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 
@@ -36,15 +36,45 @@ export default async function AdminDashboard() {
   const studentCount = users.find((u) => u.role === "STUDENT")?._count ?? 0;
   const instructorCount = users.find((u) => u.role === "INSTRUCTOR")?._count ?? 0;
 
+  // Calculate trends (simplified for demo - in real app you'd compare with previous period)
+  const courseTrend = courses._count > 10 ? 'up' : 'down';
+  const studentTrend = studentCount > 50 ? 'up' : 'down';
+  const enrollmentTrend = enrollments > 20 ? 'up' : 'down';
+  const revenueTrend = Number(revenue[0]?.total ?? 0) > 10000 ? 'up' : 'down';
+
   const STAT_CARDS = [
-    { icon: BookOpen,    label: "Курсов",       value: courses._count,   href: "/admin/courses" },
-    { icon: Users,       label: "Студентов",    value: studentCount,     href: "/admin/users" },
-    { icon: ShoppingCart,label: "Заявок",       value: enrollments,      href: "/admin/enrollments" },
-    { icon: TrendingUp,  label: "Выручка",      value: formatPrice(Number(revenue[0]?.total ?? 0)), href: null },
+    {
+      icon: BookOpen,
+      label: "Курсов",
+      value: courses._count,
+      href: "/admin/courses",
+      trend: courseTrend
+    },
+    {
+      icon: Users,
+      label: "Студентов",
+      value: studentCount,
+      href: "/admin/users",
+      trend: studentTrend
+    },
+    {
+      icon: ShoppingCart,
+      label: "Заявок",
+      value: enrollments,
+      href: "/admin/enrollments",
+      trend: enrollmentTrend
+    },
+    {
+      icon: TrendingUp,
+      label: "Выручка",
+      value: formatPrice(Number(revenue[0]?.total ?? 0)),
+      href: null,
+      trend: revenueTrend
+    },
   ];
 
   return (
-    <div style={{ padding: 32, maxWidth: 1100, margin: "0 auto" }}>
+    <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ marginBottom: 32 }}>
         <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.25em", color: "var(--c-t3)", marginBottom: 4, fontFamily: "var(--font-mono)" }}>ПАНЕЛЬ УПРАВЛЕНИЯ</p>
         <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>Дашборд</h1>
@@ -52,24 +82,31 @@ export default async function AdminDashboard() {
 
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 40 }}>
-        {STAT_CARDS.map(({ icon: Icon, label, value, href }) => {
+        {STAT_CARDS.map(({ icon: Icon, label, value, href, trend }) => {
           const inner = (
-            <div className="feature-card" style={{ padding: 20 }}>
-              <Icon size={20} style={{ color: "var(--c-red)", marginBottom: 12 }} />
+            <div className="feature-card" style={{ padding: 20, background: "var(--c-s1)", border: "1px solid var(--c-border)", borderRadius: 8, transition: "transform 0.2s, box-shadow 0.2s" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <Icon size={20} style={{ color: "var(--c-red)" }} />
+                {trend && (
+                  <span style={{ color: trend === 'up' ? 'var(--c-green)' : 'var(--c-red)', fontSize: 12 }}>
+                    {trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                  </span>
+                )}
+              </div>
               <div style={{ fontSize: 30, fontWeight: 700, color: "var(--c-t1)", marginBottom: 4, fontFamily: "var(--font-mono)" }}>{value}</div>
               <div style={{ fontSize: 12, color: "var(--c-t3)", fontFamily: "var(--font-sans)" }}>{label}</div>
             </div>
           );
-          return href ? <Link key={label} href={href} style={{ textDecoration: "none" }}>{inner}</Link> : <div key={label}>{inner}</div>;
+          return href ? <Link key={label} href={href} style={{ textDecoration: "none", display: "block" }}>{inner}</Link> : <div key={label}>{inner}</div>;
         })}
       </div>
 
       {/* Instructor count + new course */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 40, alignItems: "center" }}>
-        <span style={{ padding: "6px 12px", border: "1px solid var(--c-border)", fontSize: 12, color: "var(--c-t3)", fontFamily: "var(--font-mono)" }}>
+      <div style={{ display: "flex", gap: 12, marginBottom: 40, alignItems: "center", flexWrap: 'wrap' }}>
+        <span style={{ padding: "6px 12px", border: "1px solid var(--c-border)", fontSize: 12, color: "var(--c-t3)", fontFamily: "var(--font-mono)", borderRadius: 4 }}>
           Преподавателей: <span style={{ color: "var(--c-amber)" }}>{instructorCount}</span>
         </span>
-        <Link href="/admin/courses/new" className="btn-red" style={{ padding: "6px 14px", fontSize: 12, fontWeight: 900, textDecoration: "none", fontFamily: "var(--font-display)" }}>
+        <Link href="/admin/courses/new" className="btn-red" style={{ padding: "6px 14px", fontSize: 12, fontWeight: 900, textDecoration: "none", fontFamily: "var(--font-display)", background: "var(--c-red)", color: "var(--c-bg)", borderRadius: 4, border: "1px solid var(--c-red)", transition: "background 0.2s, transform 0.2s" }}>
           + Новый курс
         </Link>
       </div>
@@ -77,11 +114,11 @@ export default async function AdminDashboard() {
       {/* Recent enrollments */}
       <div>
         <h2 style={{ fontSize: 16, fontWeight: 900, color: "var(--c-t1)", marginBottom: 16, fontFamily: "var(--font-display)" }}>Последние заявки</h2>
-        <div style={{ background: "var(--c-s1)", border: "1px solid var(--c-border)" }}>
+        <div style={{ background: "var(--c-s1)", border: "1px solid var(--c-border)", borderRadius: 8 }}>
           <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid var(--c-border)" }}>
-                {["Студент", "Курс", "Сумма", "Дата"].map((h) => (
+                {['Студент', 'Курс', 'Сумма', 'Дата'].map((h) => (
                   <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--c-t3)", fontFamily: "var(--font-mono)" }}>{h}</th>
                 ))}
               </tr>

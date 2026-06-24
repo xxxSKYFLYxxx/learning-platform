@@ -12,7 +12,7 @@ const schema = z.object({
 export async function POST(req: NextRequest) {
   const rawBody = await req.json();
   const fallbackBody = schema.safeParse(rawBody);
-  if (fallbackBody.success && fallbackBody.data.lessonId.startsWith("fallback-layout-lesson-")) {
+  if (fallbackBody.success && fallbackBody.data.lessonId.startsWith("fallback-") && fallbackBody.data.lessonId.includes("-lesson-")) {
     return NextResponse.json({
       progress: {
         id: "fallback-progress",

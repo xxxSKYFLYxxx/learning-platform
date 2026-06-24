@@ -19,6 +19,13 @@ const COLS = [
       { href: "/offer", label: "Публичная оферта" },
     ],
   },
+  {
+    title: "CMS",
+    links: [
+      { href: "/cms", label: "Админка контента" },
+      { href: "/admin", label: "Админка БД" },
+    ],
+  },
 ];
 
 export function Footer() {
@@ -26,7 +33,7 @@ export function Footer() {
     <footer style={{ background: "var(--c-s1)", borderTop: "1px solid var(--c-border)" }}>
       {/* Main */}
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "56px 24px 40px", display: "grid", gridTemplateColumns: "1fr", gap: 48 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 48 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48 }}>
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none", marginBottom: 16 }}>

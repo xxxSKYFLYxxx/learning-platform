@@ -2,28 +2,69 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Send, Mail, MessageSquare } from "lucide-react";
+import { Send, Mail, MessageSquare, Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
 const TOPICS = ["Вопрос по курсу", "Технические проблемы", "Оплата и возврат", "Сотрудничество", "Другое"];
 
-const labelStyle: React.CSSProperties = { display: "block", fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--c-t2)", marginBottom: 8, fontFamily: "var(--font-mono)" };
-const fieldStyle: React.CSSProperties = { width: "100%", padding: "12px 16px", fontSize: 14, fontFamily: "var(--font-sans)", boxSizing: "border-box" };
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 11,
+  fontWeight: 900,
+  textTransform: "uppercase",
+  letterSpacing: "0.1em",
+  color: "var(--c-t2)",
+  marginBottom: 8,
+  fontFamily: "var(--font-mono)"
+};
+const fieldStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "12px 16px",
+  fontSize: 14,
+  fontFamily: "var(--font-sans)",
+  boxSizing: "border-box"
+};
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", topic: TOPICS[0], message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("sending");
-    await new Promise((r) => setTimeout(r, 800));
-    setStatus("sent");
+    setError(null);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Произошла ошибка при отправке");
+      }
+
+      setStatus("sent");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Произошла ошибка");
+      setStatus("error");
+    }
   }
 
   return (
     <div className="grain" style={{ background: "var(--c-bg)", minHeight: "100vh" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .contact-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .contact-form-fields { grid-template-columns: 1fr !important; }
+          .contact-info { flex-direction: column !important; }
+          .contact-submit { align-self: stretch !important; justify-content: center !important; }
+        }
+      `}</style>
       <Header />
       <main>
         {/* Hero */}
@@ -40,7 +81,7 @@ export default function ContactPage() {
         </section>
 
         <section style={{ maxWidth: 1280, margin: "0 auto", padding: "72px 24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 64 }}>
+          <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 64 }}>
             {/* Form */}
             <div>
               {status === "sent" ? (
@@ -53,39 +94,93 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                  {error && (
+                    <div style={{ padding: "10px 14px", background: "rgba(208,57,42,0.1)", border: "1px solid rgba(208,57,42,0.3)", color: "var(--c-red)", fontSize: 13, fontFamily: "var(--font-sans)" }}>
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="contact-form-fields" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                     <div>
                       <label style={labelStyle}>Имя</label>
-                      <input required type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input-dark" style={fieldStyle} placeholder="Иван Петров" />
+                      <input
+                        required
+                        type="text"
+                        minLength={2}
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        className="input-dark"
+                        style={fieldStyle}
+                        placeholder="Иван Петров"
+                      />
                     </div>
                     <div>
                       <label style={labelStyle}>Email</label>
-                      <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input-dark" style={fieldStyle} placeholder="ivan@example.com" />
+                      <input
+                        required
+                        type="email"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        className="input-dark"
+                        style={fieldStyle}
+                        placeholder="ivan@example.com"
+                      />
                     </div>
                   </div>
 
                   <div>
                     <label style={labelStyle}>Тема</label>
-                    <select value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} className="input-dark" style={fieldStyle}>
+                    <select
+                      value={form.topic}
+                      onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                      className="input-dark"
+                      style={fieldStyle}
+                    >
                       {TOPICS.map((t) => <option key={t} style={{ background: "var(--c-s1)" }}>{t}</option>)}
                     </select>
                   </div>
 
                   <div>
                     <label style={labelStyle}>Сообщение</label>
-                    <textarea required rows={6} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="input-dark" style={{ ...fieldStyle, resize: "none" }} placeholder="Опишите ваш вопрос..." />
+                    <textarea
+                      required
+                      minLength={10}
+                      rows={6}
+                      value={form.message}
+                      onChange={(e) => setForm({ ...form, message: e.target.value })}
+                      className="input-dark"
+                      style={{ ...fieldStyle, resize: "none" }}
+                      placeholder="Опишите ваш вопрос..."
+                    />
                   </div>
 
-                  <button type="submit" disabled={status === "sending"} className="btn-red" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 32px", fontWeight: 900, fontSize: 14, border: "none", cursor: status === "sending" ? "not-allowed" : "pointer", opacity: status === "sending" ? 0.5 : 1, fontFamily: "var(--font-display)" }}>
-                    <Send size={16} />
+                  <button
+                    type="submit"
+                    disabled={status === "sending"}
+                    className="btn-red contact-submit"
+                    style={{
+                      alignSelf: "flex-start",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "13px 32px",
+                      fontWeight: 900,
+                      fontSize: 14,
+                      border: "none",
+                      cursor: status === "sending" ? "not-allowed" : "pointer",
+                      opacity: status === "sending" ? 0.5 : 1,
+                      fontFamily: "var(--font-display)"
+                    }}
+                  >
+                    {status === "sending" ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
                     {status === "sending" ? "Отправка..." : "Отправить"}
                   </button>
                 </form>
               )}
             </div>
 
-            {/* Info */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Info sidebar */}
+            <div className="contact-info" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{ border: "1px solid var(--c-border)", background: "var(--c-s1)", padding: 24 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                   <Mail size={18} style={{ color: "var(--c-red)" }} />

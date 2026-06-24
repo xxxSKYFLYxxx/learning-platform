@@ -112,7 +112,15 @@ body {
 }
 .animate-marquee {
   animation: marquee 40s linear infinite;
+  display: flex;
   will-change: transform;
+}
+.marquee-group {
+  box-sizing: content-box;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  padding-right: 10px;
 }
 
 /* ━━ Legacy brutalist shadows ━━━━━━━━━━━━━━━━━━━━━━━━━━ */

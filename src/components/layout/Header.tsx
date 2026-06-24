@@ -64,9 +64,14 @@ export function Header() {
         <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
           {session ? (
             <>
-              <Link href="/dashboard" className="link-cream" style={{ fontSize: 14, fontWeight: 500, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
-                {session.user?.name?.split(" ")[0] ?? "Кабинет"}
-              </Link>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Link href="/dashboard/profile" className="link-cream" style={{ fontSize: 14, fontWeight: 500, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
+                  👤
+                </Link>
+                <Link href="/dashboard" className="link-cream" style={{ fontSize: 14, fontWeight: 500, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
+                  {session.user?.name?.split(" ")[0] ?? "Кабинет"}
+                </Link>
+              </div>
               <button onClick={() => signOut()} className="link-muted" style={{ fontSize: 12, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>
                 [выйти]
               </button>
@@ -103,6 +108,7 @@ export function Header() {
           {session ? (
             <>
               <Link href="/dashboard" onClick={() => setOpen(false)} style={{ color: "var(--c-t1)", fontSize: 15, textDecoration: "none" }}>Кабинет</Link>
+              <Link href="/dashboard/profile" onClick={() => setOpen(false)} style={{ color: "var(--c-t1)", fontSize: 15, textDecoration: "none" }}>Настройки профиля</Link>
               <button onClick={() => signOut()} style={{ color: "var(--c-red)", textAlign: "left", background: "none", border: "none", fontSize: 14, cursor: "pointer" }}>Выйти</button>
             </>
           ) : (

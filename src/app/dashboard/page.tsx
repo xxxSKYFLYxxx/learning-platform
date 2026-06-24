@@ -70,16 +70,21 @@ export default async function DashboardPage() {
       <Header />
       <main style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 24px" }}>
         {/* Greeting */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 40 }}>
-          {session.user.image && (
-            <Image src={session.user.image} alt={session.user.name ?? ""} width={56} height={56} unoptimized style={{ borderRadius: "50%", border: "1px solid var(--c-border)" }} />
-          )}
-          <div>
-            <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>
-              Привет, {session.user.name?.split(" ")[0] ?? "Студент"}!
-            </h1>
-            <p style={{ color: "var(--c-t3)", fontSize: 14, marginTop: 2, fontFamily: "var(--font-sans)" }}>Продолжайте обучение</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {session.user.image && (
+              <Image src={session.user.image} alt={session.user.name ?? ""} width={56} height={56} unoptimized style={{ borderRadius: "50%", border: "1px solid var(--c-border)" }} />
+            )}
+            <div>
+              <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--c-t1)", fontFamily: "var(--font-display)" }}>
+                Привет, {session.user.name?.split(" ")[0] ?? "Студент"}!
+              </h1>
+              <p style={{ color: "var(--c-t3)", fontSize: 14, marginTop: 2, fontFamily: "var(--font-sans)" }}>Продолжайте обучение</p>
+            </div>
           </div>
+          <Link href="/dashboard/profile" className="btn-ghost" style={{ padding: "8px 16px", fontSize: 13, textDecoration: "none", fontFamily: "var(--font-display)", fontWeight: 700 }}>
+            Настройки профиля →
+          </Link>
         </div>
 
         {/* Stats */}

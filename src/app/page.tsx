@@ -263,11 +263,15 @@ export default async function HomePage() {
         {/* ━━━━ MARQUEE ━━━━ */}
         <Div />
         <div style={{ background: "var(--c-s1)", overflow: "hidden", padding: "14px 0" }}>
-          <div className="animate-marquee" style={{ display: "flex", gap: 10, width: "max-content" }}>
-            {[...TECHS, ...TECHS].map((t, i) => (
-              <span key={i} className="tag-pill" style={{ flexShrink: 0, padding: "5px 14px", fontSize: 11, fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>
-                {t}
-              </span>
+          <div className="animate-marquee" style={{ width: "max-content" }}>
+            {[0, 1].map((copy) => (
+              <div key={copy} className="marquee-group" aria-hidden={copy === 1}>
+                {TECHS.map((t) => (
+                  <span key={`${copy}-${t}`} className="tag-pill" style={{ flexShrink: 0, padding: "5px 14px", fontSize: 11, fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>
+                    {t}
+                  </span>
+                ))}
+              </div>
             ))}
           </div>
         </div>

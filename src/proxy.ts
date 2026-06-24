@@ -1,12 +1,12 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/instructor", "/admin", "/learn"];
+const PROTECTED_PREFIXES = ["/dashboard", "/instructor", "/admin", "/cms", "/learn"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isFallbackLesson =
-    pathname.startsWith("/learn/verstka-s-nulya/fallback-layout-lesson-");
+    pathname.includes("/fallback-") && pathname.includes("-lesson-");
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
 
   if (isProtected && !isFallbackLesson && !req.auth) {
@@ -15,7 +15,7 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname.startsWith("/admin") && req.auth?.user?.role !== "ADMIN") {
+  if ((pathname.startsWith("/admin") || pathname.startsWith("/cms")) && req.auth?.user?.role !== "ADMIN") {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
