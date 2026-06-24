@@ -8,7 +8,11 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const DEMO_HASH = bcrypt.hashSync("password123", 10);
+const seedUserPassword = process.env.SEED_USER_PASSWORD;
+if (!seedUserPassword) {
+  throw new Error("SEED_USER_PASSWORD is required to seed demo users.");
+}
+const DEMO_HASH = bcrypt.hashSync(seedUserPassword, 10);
 const LAYOUT_IMAGE =
   "https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800&h=450&fit=crop";
 

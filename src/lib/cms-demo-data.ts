@@ -236,7 +236,7 @@ export const cmsUsers: CmsUser[] = [
   { id: "user-2", name: "Дмитрий Орлов", email: "dima@example.com", role: "STUDENT", courses: 5, joinedAt: "2026-04-19" },
   { id: "user-3", name: "Мария Соколова", email: "maria@kurs.dev", role: "INSTRUCTOR", courses: 2, joinedAt: "2026-03-02" },
   { id: "user-4", name: "Иван Петров", email: "ivan@kurs.dev", role: "INSTRUCTOR", courses: 3, joinedAt: "2026-03-04" },
-  { id: "user-5", name: "Матвей Админ", email: "admin@kurs.dev", role: "ADMIN", courses: 0, joinedAt: "2026-02-21" },
+  { id: "user-5", name: "Матвей Админ", email: "owner@example.com", role: "ADMIN", courses: 0, joinedAt: "2026-02-21" },
   { id: "user-6", name: "Елена Новикова", email: "elena@example.com", role: "STUDENT", courses: 2, joinedAt: "2026-05-08" },
   { id: "user-7", name: "Артем Ким", email: "artem@example.com", role: "STUDENT", courses: 1, joinedAt: "2026-05-16" },
 ];

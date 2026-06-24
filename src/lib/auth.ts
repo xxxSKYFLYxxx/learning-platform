@@ -10,7 +10,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email:    { label: "Email", type: "email" },
+        email: { label: "Email", type: "email" },
         password: { label: "Пароль", type: "password" },
       },
       async authorize(credentials) {
@@ -18,7 +18,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials?.password as string | undefined;
         if (!email || !password) return null;
 
-        if (email === "admin@kurs.dev" && password === "password123") {
+        const fallbackAdminEmail = process.env.FALLBACK_ADMIN_EMAIL?.trim().toLowerCase();
+        const fallbackAdminPassword = process.env.FALLBACK_ADMIN_PASSWORD;
+
+        if (fallbackAdminEmail && fallbackAdminPassword && email === fallbackAdminEmail && password === fallbackAdminPassword) {
           try {
             const user = await prisma.user.findUnique({ where: { email } });
             if (user?.passwordHash) {
@@ -34,12 +37,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               }
             }
           } catch {
-            // Demo admin fallback keeps the CMS reachable before production DB is configured.
+            // Private fallback keeps the CMS reachable before production DB is configured.
           }
 
           return {
-            id: "demo-admin",
-            email: "admin@kurs.dev",
+            id: "fallback-admin",
+            email: fallbackAdminEmail,
             name: "Администратор",
             image: null,
             role: "ADMIN",
@@ -53,27 +56,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!valid) return null;
 
         return {
-          id:    user.id,
+          id: user.id,
           email: user.email,
-          name:  user.name,
+          name: user.name,
           image: user.image,
-          role:  user.role,
+          role: user.role,
         };
       },
     }),
   ],
   callbacks: {
     jwt({ token, user }) {
-      // На первом входе user заполнен — переносим id и роль в токен
       if (user) {
-        token.id   = user.id;
+        token.id = user.id;
         token.role = (user as { role?: string }).role ?? "STUDENT";
       }
       return token;
     },
     session({ session, token }) {
       if (session.user) {
-        session.user.id   = (token.id as string) ?? token.sub!;
+        session.user.id = (token.id as string) ?? token.sub!;
         session.user.role = (token.role as string) ?? "STUDENT";
       }
       return session;
@@ -81,6 +83,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: "/login",
-    error:  "/login",
+    error: "/login",
   },
 });

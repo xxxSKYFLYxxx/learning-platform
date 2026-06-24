@@ -21,8 +21,12 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-// Единый пароль для всех тестовых аккаунтов: "password123"
-const DEMO_HASH = bcrypt.hashSync("password123", 10);
+// Единый пароль для всех тестовых аккаунтов
+const seedUserPassword = process.env.SEED_USER_PASSWORD;
+if (!seedUserPassword) {
+  throw new Error("SEED_USER_PASSWORD is required to seed demo users.");
+}
+const DEMO_HASH = bcrypt.hashSync(seedUserPassword, 10);
 
 // Pexels CDN — verified free stock photos
 const PX = (id: number) =>
